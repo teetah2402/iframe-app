@@ -1,0 +1,109 @@
+<div class="w-full px-6 py-4 flex justify-between items-center bg-panel/50 backdrop-blur-md border-b-4 border-border shrink-0 z-50">
+    <div class="flex items-center gap-4">
+        <div class="bg-brand p-2 rounded-xl shadow-lg -rotate-6">
+            <v-icon icon="mdi-shield-glitch" color="white"></v-icon>
+        </div>
+        <div class="flex flex-col">
+            <span class="font-display font-black text-2xl tracking-tighter leading-none text-main uppercase">GLITCH<span class="text-brand">ARMOR</span></span>
+            <span class="text-[8px] font-black opacity-40 uppercase tracking-[0.2em] mt-1 text-main">Anti-Neural Shield</span>
+        </div>
+    </div>
+    <div class="flex gap-3">
+        <button @click="currentTab = 'lander'" class="btn-game bg-panel border-4 border-border px-6 py-2 text-[10px] flex items-center gap-2 hover:text-brand transition-all">
+            <v-icon size="16">mdi-information-outline</v-icon> BRIEF
+        </button>
+    </div>
+</div>
+
+<div class="flex-1 flex flex-col md:flex-row p-4 md:p-8 gap-8 relative overflow-hidden">
+
+    <div class="w-full md:w-[400px] flex flex-col gap-8 shrink-0 h-auto md:h-full overflow-y-auto no-scrollbar">
+
+        <div class="gummy-board p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-pop_pink opacity-5 rounded-bl-[4rem]"></div>
+            <h3 class="font-display font-black text-pop_pink text-2xl mb-8 flex items-center gap-3">
+                <v-icon>mdi-flask-outline</v-icon> {{ t.step2 }}
+            </h3>
+
+            <div class="space-y-10 px-2">
+                <div class="group">
+                    <div class="flex justify-between text-xs font-black mb-4 uppercase tracking-widest opacity-60">
+                        <span>Poison Intensity</span>
+                        <span class="text-pop_pink font-black text-lg">{{ intensity }}%</span>
+                    </div>
+                    <input v-model="intensity" type="range" min="1" max="100" class="w-full accent-pop_pink h-3 bg-border rounded-full appearance-none cursor-pointer">
+                    <div class="flex justify-between text-[10px] font-black mt-3 opacity-40 uppercase">
+                        <span>{{ t.stealth }}</span>
+                        <span>{{ t.chaos }}</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-[11px] font-black opacity-50 uppercase tracking-widest ml-2">Armor Mode</label>
+                    <select v-model="mode" class="w-full p-4 font-black">
+                        <option value="pixel">{{ t.modePixel }}</option>
+                        <option value="chroma">{{ t.modeChroma }}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-auto pb-40 md:pb-6">
+            <button
+                @click="executePoison"
+                :disabled="!filePreview || isProcessing"
+                class="btn-game w-full py-8 bg-brand text-white text-2xl shadow-[0_12px_0_rgba(0,0,0,0.15)] hover:scale-[1.02] active:scale-95 transition-all"
+            >
+                <span v-if="!isProcessing">{{ t.processBtn }}</span>
+                <span v-else class="flex items-center justify-center gap-3">
+                    <v-icon class="animate-spin">mdi-loading</v-icon> {{ t.loading }}
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 gummy-board border-8 relative flex flex-col bg-black/5 overflow-hidden shadow-inner">
+
+        <div
+            v-if="!resultImage"
+            @click="$refs.fileInput.click()"
+            class="m-6 flex-1 border-4 border-dashed border-border rounded-[3rem] transition-all duration-300 cursor-pointer text-center group flex flex-col items-center justify-center bg-panel/30"
+        >
+            <input type="file" ref="fileInput" @change="handleFile" accept="image/*" class="hidden">
+
+            <div v-if="!filePreview" class="py-10">
+                <div class="text-8xl mb-6 group-hover:scale-110 transition-transform">🎨</div>
+                <h4 class="font-display font-black text-3xl text-main uppercase tracking-tighter">{{ t.step1 }}</h4>
+                <p class="text-xs font-black opacity-40 uppercase mt-2 tracking-widest">Target for Neural Shielding</p>
+            </div>
+
+            <div v-else class="relative p-4 animate-pop-in">
+                <img :src="filePreview" class="max-h-[60vh] rounded-[2.5rem] shadow-2xl border-4 border-white">
+                <div class="absolute -top-4 -right-4 bg-brand text-white px-8 py-3 rounded-full shadow-2xl font-black text-sm tracking-widest border-4 border-white">
+                    READY
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="flex-1 p-8 flex flex-col items-center justify-center animate-pop-in relative">
+            <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(var(--brand-color) 2px, transparent 2px); background-size: 30px 30px;"></div>
+
+            <div class="relative mb-10 group">
+                <img :src="resultImage" class="max-h-[55vh] rounded-[3rem] shadow-[0_40px_80px_rgba(0,0,0,0.4)] border-[12px] border-white transition-transform group-hover:scale-[1.02] duration-500">
+                <div class="absolute -top-6 -right-6 bg-pop_green text-white px-8 py-3 rounded-full shadow-2xl font-black animate-bounce border-4 border-white tracking-widest uppercase text-sm">
+                    Shield Active! 🔒
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-6 w-full max-w-md">
+                <a :href="resultImage" :download="'armored_' + Date.now() + '.png'" class="btn-game w-full py-6 bg-pop_green text-white text-xl shadow-[0_8px_0_#04A077] flex items-center justify-center gap-3">
+                    <v-icon>mdi-download</v-icon> {{ t.dlBtn }}
+                </a>
+
+                <button @click="resultImage = null; filePreview = null" class="text-[11px] font-black opacity-30 hover:opacity-100 uppercase tracking-[0.3em] transition-opacity text-main">
+                    RESET PROTECTION SYSTEM
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

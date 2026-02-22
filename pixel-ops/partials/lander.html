@@ -1,0 +1,45 @@
+<div class="min-h-full flex flex-col items-center justify-center p-8 text-center animate-pop-in">
+    <div class="relative w-40 h-40 mb-10 animate-bounce group cursor-pointer">
+        <div class="absolute inset-0 border-8 border-brand rounded-[2.5rem] bg-panel shadow-[0_15px_0_rgba(0,0,0,0.1)] flex items-center justify-center overflow-hidden">
+            <div class="grid grid-cols-3 gap-2">
+                <div class="w-6 h-6 bg-pop_pink rounded-lg animate-pulse"></div>
+                <div class="w-6 h-6 bg-pop_yellow rounded-lg"></div>
+                <div class="w-6 h-6 bg-pop_blue rounded-lg animate-pulse" style="animation-delay: 0.2s"></div>
+                <div class="w-6 h-6 bg-pop_green rounded-lg"></div>
+                <div class="w-6 h-6 bg-brand rounded-lg animate-pulse" style="animation-delay: 0.4s"></div>
+                <div class="w-6 h-6 bg-pop_pink rounded-lg"></div>
+                <div class="w-6 h-6 bg-pop_yellow rounded-lg animate-pulse" style="animation-delay: 0.6s"></div>
+                <div class="w-6 h-6 bg-pop_blue rounded-lg"></div>
+                <div class="w-6 h-6 bg-pop_green rounded-lg animate-pulse" style="animation-delay: 0.8s"></div>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="text-6xl md:text-8xl font-display font-black mb-6 leading-[0.9] text-main tracking-tighter">
+        {{ t.heroTitle }} <br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-pop_blue to-pop_green drop-shadow-sm">{{ t.heroSub }}</span>
+    </h1>
+
+    <p class="text-muted text-xl md:text-2xl max-w-xl mx-auto mb-14 font-bold leading-snug">
+        {{ t.heroDesc }}
+    </p>
+
+    <div class="flex flex-wrap justify-center gap-4 mb-16">
+        <div class="gummy-board px-6 py-3 border-2 flex items-center gap-2 transform -rotate-2">
+            <v-icon icon="mdi-shield-check" color="pop_blue"></v-icon>
+            <span class="text-xs font-black uppercase">Local Squeeze</span>
+        </div>
+        <div class="gummy-board px-6 py-3 border-2 flex items-center gap-2 transform rotate-2">
+            <v-icon icon="mdi-lightning-bolt" color="pop_yellow"></v-icon>
+            <span class="text-xs font-black uppercase">Turbo Engine</span>
+        </div>
+        <div class="gummy-board px-6 py-3 border-2 flex items-center gap-2 transform -rotate-1">
+            <v-icon icon="mdi-dna" color="pop_pink"></v-icon>
+            <span class="text-xs font-black uppercase">Lossless-Ish</span>
+        </div>
+    </div>
+
+    <button @click="currentTab = 'app'" class="btn-game px-16 py-6 bg-pop_pink text-white text-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all ring-8 ring-pop_pink/20">
+        {{ t.startBtn }}
+    </button>
+</div>

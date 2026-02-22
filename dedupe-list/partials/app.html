@@ -1,0 +1,124 @@
+<div class="flex flex-col h-full w-full font-sans relative overflow-hidden bg-core">
+
+    <div class="flex flex-col md:flex-row justify-between items-center p-4 border-b-4 border-[var(--border-color)] bg-panel z-20 shrink-0 gap-3 gummy-board rounded-none rounded-b-[2rem] shadow-sm relative">
+        <div class="flex w-full md:w-auto justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-pop_amber rounded-full flex items-center justify-center border-4 border-[var(--border-color)] shadow-sm">
+                    <v-icon icon="mdi-filter-variant" color="white" size="28"></v-icon>
+                </div>
+                <div>
+                    <h1 class="font-display text-xl font-black text-main m-0 leading-none tracking-wide uppercase">
+                        {{ t.app_title }}
+                    </h1>
+                </div>
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="md:hidden text-xs text-brand font-black flex items-center gap-1 bg-core px-4 py-2 rounded-full border-4 border-[var(--border-color)] shadow-sm">
+                {{ t.btn_info }} <v-icon size="small">mdi-arrow-right</v-icon>
+            </button>
+        </div>
+
+        <div class="flex w-full md:w-auto gap-4 items-center justify-between md:justify-end">
+            <div class="flex gap-2">
+                <div class="bg-core border-2 border-[var(--border-color)] px-3 py-1 rounded-xl text-center">
+                    <span class="text-[9px] text-muted font-black block uppercase">{{ t.stat_input }}</span>
+                    <span class="text-xs font-black text-main">{{ statInput }}</span>
+                </div>
+                <div class="bg-pop_amber/10 border-2 border-brand px-3 py-1 rounded-xl text-center">
+                    <span class="text-[9px] text-brand font-black block uppercase">{{ t.stat_output }}</span>
+                    <span class="text-xs font-black text-brand">{{ statOutput }}</span>
+                </div>
+                <div class="bg-pop_pink/10 border-2 border-pop_pink px-3 py-1 rounded-xl text-center">
+                    <span class="text-[9px] text-pop_pink font-black block uppercase">{{ t.stat_removed }}</span>
+                    <span class="text-xs font-black text-pop_pink">{{ statRemoved }}</span>
+                </div>
+            </div>
+
+            <button onclick="window.switchAppTab('lander')" class="hidden md:flex text-xs text-main font-black items-center gap-1 bg-core px-5 py-2 rounded-full border-4 border-[var(--border-color)] hover:bg-pop_amber hover:text-white transition shadow-sm">
+                <v-icon size="small">mdi-arrow-left</v-icon> {{ t.btn_info }}
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0 p-4 md:p-6 pb-40 md:pb-6 z-10 gap-4">
+
+        <div class="w-full md:w-64 gummy-board bg-panel p-5 flex flex-col gap-5 shrink-0 h-fit md:h-full overflow-y-auto">
+
+            <div class="border-b-4 border-[var(--border-color)] pb-3">
+                 <h3 class="text-xs font-black font-display text-muted uppercase">{{ t.opt_title }}</h3>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <label class="flex items-center gap-3 p-3 bg-core rounded-xl border-2 border-[var(--border-color)] cursor-pointer hover:border-brand transition group">
+                    <div class="relative flex items-center justify-center">
+                        <input type="checkbox" v-model="optLowercase" class="peer sr-only">
+                        <div class="w-6 h-6 bg-white border-2 border-muted rounded-md peer-checked:bg-brand peer-checked:border-brand transition"></div>
+                        <v-icon icon="mdi-check" size="x-small" class="text-white absolute opacity-0 peer-checked:opacity-100"></v-icon>
+                    </div>
+                    <div class="flex-1">
+                        <span class="text-xs font-black text-main block">{{ t.opt_lowercase }}</span>
+                        <span class="text-[9px] text-muted font-bold">{{ t.opt_lowercase_desc }}</span>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 bg-core rounded-xl border-2 border-[var(--border-color)] cursor-pointer hover:border-brand transition group">
+                    <div class="relative flex items-center justify-center">
+                        <input type="checkbox" v-model="optTrim" class="peer sr-only">
+                        <div class="w-6 h-6 bg-white border-2 border-muted rounded-md peer-checked:bg-brand peer-checked:border-brand transition"></div>
+                        <v-icon icon="mdi-check" size="x-small" class="text-white absolute opacity-0 peer-checked:opacity-100"></v-icon>
+                    </div>
+                    <div class="flex-1">
+                        <span class="text-xs font-black text-main block">{{ t.opt_trim }}</span>
+                        <span class="text-[9px] text-muted font-bold">{{ t.opt_trim_desc }}</span>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 p-3 bg-core rounded-xl border-2 border-[var(--border-color)] cursor-pointer hover:border-brand transition group">
+                    <div class="relative flex items-center justify-center">
+                        <input type="checkbox" v-model="optSort" class="peer sr-only">
+                        <div class="w-6 h-6 bg-white border-2 border-muted rounded-md peer-checked:bg-brand peer-checked:border-brand transition"></div>
+                        <v-icon icon="mdi-check" size="x-small" class="text-white absolute opacity-0 peer-checked:opacity-100"></v-icon>
+                    </div>
+                    <div class="flex-1">
+                        <span class="text-xs font-black text-main block">{{ t.opt_sort }}</span>
+                        <span class="text-[9px] text-muted font-bold">{{ t.opt_sort_desc }}</span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="mt-auto flex flex-col gap-3">
+                <button @click="processDedupe" class="btn-game w-full bg-brand text-white py-3 rounded-[1.2rem] font-black text-xs uppercase flex justify-center items-center gap-2 hover:brightness-110">
+                    <v-icon icon="mdi-flash" size="small"></v-icon> {{ t.btn_process }}
+                </button>
+                <button @click="clearAll" class="w-full text-[10px] text-pop_pink font-black uppercase hover:text-red-600 flex justify-center items-center gap-1 py-2">
+                    <v-icon icon="mdi-trash-can-outline" size="small"></v-icon> {{ t.btn_clear }}
+                </button>
+            </div>
+
+        </div>
+
+        <div class="flex-1 flex flex-col md:flex-row gap-4 h-full min-h-[400px]">
+
+            <div class="flex-1 flex flex-col gummy-board border-4 border-muted overflow-hidden relative">
+                <div class="bg-muted text-white text-xs font-black font-display p-3 text-center uppercase tracking-widest border-b-4 border-muted flex items-center justify-center gap-2">
+                    <v-icon icon="mdi-format-list-bulleted" size="small"></v-icon> {{ t.label_input }}
+                </div>
+                <textarea v-model="inputText" class="flex-1 bg-muted/5 border-none rounded-none p-4 text-main text-sm font-bold resize-none focus:outline-none focus:bg-muted/10 transition-all custom-scroll" :placeholder="t.ph_input"></textarea>
+            </div>
+
+            <div class="flex-1 flex flex-col gummy-board border-4 border-brand overflow-hidden relative">
+                <div class="bg-brand text-white text-xs font-black font-display p-3 text-center uppercase tracking-widest border-b-4 border-brand flex items-center justify-center gap-2">
+                    <v-icon icon="mdi-check-all" size="small"></v-icon> {{ t.label_output }}
+                </div>
+                <textarea readonly v-model="outputText" class="flex-1 bg-brand/5 border-none rounded-none p-4 text-main text-sm font-bold resize-none focus:outline-none transition-all custom-scroll" :placeholder="t.ph_output"></textarea>
+
+                <div class="absolute bottom-4 right-4">
+                    <button @click="copyResult" class="btn-game bg-pop_yellow text-brand border-2 border-brand px-4 py-2 rounded-full font-black text-xs uppercase shadow-md flex items-center gap-2 hover:brightness-110">
+                        <v-icon icon="mdi-content-copy" size="small"></v-icon> {{ t.btn_copy }}
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

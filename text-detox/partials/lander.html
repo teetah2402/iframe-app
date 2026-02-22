@@ -1,0 +1,91 @@
+<div class="max-w-4xl mx-auto px-4 md:px-6 pt-10 md:pt-16 pb-24 pop-in font-sans">
+
+    <div class="text-center mb-10 md:mb-16">
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-pop_pink/20 text-pop_pink rounded-full text-[10px] font-bold mb-6 tracking-widest shadow-sm border-2 border-pop_pink">
+            <v-icon icon="mdi-fingerprint" size="small" class="animate-pulse"></v-icon> {{ t.lander_badge }}
+        </div>
+        <h1 class="text-3xl md:text-6xl font-black mb-4 font-display text-main tracking-tight leading-tight uppercase">
+            {{ t.lander_title }} <br>
+            <span class="text-brand underline decoration-wavy decoration-pop_pink">{{ t.lander_title_hl }}</span>
+        </h1>
+        <div class="text-muted max-w-2xl mx-auto text-sm md:text-lg leading-relaxed font-bold space-y-2">
+            <p><span class="text-pop_pink font-black">Real talk, Bro.</span> {{ t.lander_desc_1 }}</p>
+            <p>{{ t.lander_desc_2 }}</p>
+        </div>
+    </div>
+
+    <div class="gummy-board w-full max-w-3xl mx-auto overflow-hidden relative aspect-video group mb-10 md:mb-16 transform hover:scale-[1.02] transition-all duration-300 bg-core flex flex-col items-center justify-center p-4">
+
+        <div class="absolute top-[-10%] left-[-10%] w-56 h-56 bg-brand rounded-full opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-[-15%] right-[-10%] w-64 h-64 bg-pop_pink rounded-full opacity-10 animate-bounce" style="animation-duration: 4s;"></div>
+
+        <div class="relative z-10 w-full md:w-2/3 h-5/6 bg-panel rounded-[2rem] border-4 border-[var(--border-color)] shadow-sm flex flex-col items-center p-6 overflow-hidden">
+
+            <div class="w-3/4 bg-core border-4 border-[var(--border-color)] rounded-xl p-4 flex flex-col gap-2 relative transform -translate-y-4 group-hover:translate-y-8 transition-transform duration-[2000ms] ease-linear z-10">
+                <div class="flex items-center gap-1">
+                    <div class="h-3 w-1/2 bg-muted rounded-full opacity-50"></div>
+                    <div class="h-3 w-2 bg-pop_pink rounded-full animate-ping"></div> <div class="h-3 w-1/4 bg-muted rounded-full opacity-50"></div>
+                </div>
+                <div class="flex items-center gap-1">
+                    <div class="h-3 w-full bg-muted rounded-full opacity-50"></div>
+                    <div class="h-3 w-2 bg-pop_pink rounded-full"></div> </div>
+                <div class="flex items-center gap-1">
+                    <div class="h-3 w-3/4 bg-muted rounded-full opacity-50"></div>
+                </div>
+            </div>
+
+            <div class="absolute top-1/2 left-0 w-full h-8 bg-brand/20 border-y-4 border-brand shadow-[0_0_20px_var(--brand-color)] z-20 flex items-center justify-center">
+                <v-icon icon="mdi-shield-check" class="text-brand animate-spin-slow"></v-icon>
+            </div>
+
+            <div class="w-3/4 bg-panel border-4 border-brand rounded-xl p-4 flex flex-col gap-2 relative transform translate-y-16 group-hover:translate-y-32 transition-transform duration-[2000ms] ease-linear z-10 opacity-0 group-hover:opacity-100">
+                <div class="h-3 w-3/4 bg-brand rounded-full opacity-80"></div>
+                <div class="h-3 w-full bg-brand rounded-full opacity-80"></div>
+                <div class="h-3 w-1/2 bg-brand rounded-full opacity-80"></div>
+            </div>
+
+        </div>
+
+        <div class="absolute bottom-4 right-4 bg-panel px-4 py-2 rounded-full border-4 border-[var(--border-color)] text-brand font-black text-[10px] md:text-xs shadow-md z-30 flex items-center gap-2">
+            <v-icon icon="mdi-check-decagram" size="small" class="text-brand"></v-icon>
+            {{ t.lander_art_badge }}
+        </div>
+    </div>
+
+    <div class="text-center mb-16 md:mb-20">
+        <button onclick="window.switchAppTab('app')" class="btn-game w-full md:w-auto bg-brand hover:brightness-110 text-white font-display py-4 px-10 rounded-[1.5rem] text-sm md:text-lg uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 mx-auto">
+            <v-icon icon="mdi-shield-check-outline"></v-icon> {{ t.lander_btn_start }}
+        </button>
+    </div>
+
+    <div class="max-w-3xl mx-auto text-sm md:text-base border-t-4 border-[var(--border-color)] pt-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="gummy-board bg-panel p-6 flex items-start gap-4">
+                <div class="bg-pop_pink/20 p-3 rounded-2xl text-pop_pink border-2 border-pop_pink shrink-0">
+                    <v-icon icon="mdi-ghost" size="large"></v-icon>
+                </div>
+                <div>
+                    <h3 class="text-main font-black font-display text-lg mb-1">{{ t.lander_feat1_title }}</h3>
+                    <p class="text-muted font-bold text-xs leading-relaxed">
+                        {{ t.lander_feat1_desc }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="gummy-board bg-panel p-6 flex items-start gap-4">
+                <div class="bg-brand/20 p-3 rounded-2xl text-brand border-2 border-brand shrink-0">
+                    <v-icon icon="mdi-check-circle-outline" size="large"></v-icon>
+                </div>
+                <div>
+                    <h3 class="text-main font-black font-display text-lg mb-1">{{ t.lander_feat2_title }}</h3>
+                    <p class="text-muted font-bold text-xs leading-relaxed">
+                        {{ t.lander_feat2_desc }}
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

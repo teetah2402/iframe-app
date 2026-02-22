@@ -1,0 +1,106 @@
+<div class="w-full px-6 py-4 flex justify-between items-center bg-panel/50 backdrop-blur-md border-b-4 border-border shrink-0 z-50 sticky top-0">
+    <div class="flex items-center gap-4 cursor-pointer" @click="currentTab = 'lander'">
+        <div class="bg-brand p-2 rounded-xl shadow-lg -rotate-6">
+            <v-icon icon="mdi-scan-helper" color="white"></v-icon>
+        </div>
+        <div class="flex flex-col">
+            <span class="font-display font-black text-2xl tracking-tighter leading-none text-main uppercase">PALETTE<span class="text-brand">RECON</span></span>
+            <span class="text-[8px] font-black opacity-40 uppercase tracking-[0.2em] mt-1 text-main">Visual Intel v5.0</span>
+        </div>
+    </div>
+    <div class="flex gap-2">
+        <button @click="currentTab = 'lander'" class="btn-game bg-panel border-4 border-border px-6 py-2 text-[10px] flex items-center gap-2 hover:text-brand transition-all">
+            <v-icon size="16">mdi-information-outline</v-icon> {{ t.back }}
+        </button>
+    </div>
+</div>
+
+<div class="flex-1 flex flex-col lg:flex-row p-4 md:p-8 gap-8 overflow-y-auto md:overflow-hidden pb-40 md:pb-6 no-scrollbar">
+
+    <div class="w-full lg:w-[450px] flex flex-col gap-6 shrink-0 h-auto md:h-full overflow-y-auto no-scrollbar">
+
+        <div class="gummy-board p-4 flex-1 relative flex flex-col items-center justify-center min-h-[40vh] overflow-hidden group bg-black/5 border-dashed cursor-pointer" @click="$refs.fileInput.click()">
+            <input type="file" ref="fileInput" @change="handleFile" accept="image/*">
+
+            <div v-if="!previewImg" class="text-center group-hover:scale-110 transition-transform">
+                <div class="w-24 h-24 bg-brand/10 border-4 border-dashed border-brand/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <v-icon icon="mdi-upload" size="50" class="text-brand"></v-icon>
+                </div>
+                <h3 class="font-display text-xl font-black uppercase text-main">{{ t.app_upload_title }}</h3>
+                <p class="font-bold text-muted text-[10px] uppercase tracking-widest mt-2">{{ t.app_upload_desc }}</p>
+            </div>
+
+            <img v-else :src="previewImg" class="w-full h-full object-contain rounded-2xl animate-pop-in">
+
+            <div v-if="previewImg" class="absolute bottom-4 right-4 bg-brand text-white p-3 rounded-full shadow-xl">
+                <v-icon icon="mdi-refresh"></v-icon>
+            </div>
+        </div>
+
+        <div class="gummy-board p-6 bg-brand text-white flex justify-between items-center shadow-2xl border-none">
+            <div class="flex items-center gap-4">
+                <div class="bg-white/20 p-3 rounded-2xl">
+                    <v-icon icon="mdi-radar" size="32" :class="scanStatus === 'processing' ? 'animate-spin-slow' : ''"></v-icon>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black opacity-70 uppercase tracking-widest leading-none">Scanner Ops</p>
+                    <h4 class="font-display text-xl font-black uppercase tracking-tight">{{ t['status_' + scanStatus] }}</h4>
+                </div>
+            </div>
+            <v-icon v-if="scanStatus === 'done'" icon="mdi-check-decagram" size="32"></v-icon>
+        </div>
+    </div>
+
+    <div class="flex-1 gummy-board border-8 relative flex flex-col bg-black/5 overflow-hidden shadow-inner min-h-[60vh] md:min-h-0">
+        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(var(--brand-color) 2px, transparent 2px); background-size: 30px 30px;"></div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar p-8 relative z-10">
+            <div v-if="palette.length > 0" class="animate-pop-in">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="font-display text-3xl font-black text-main flex items-center gap-3">
+                        <v-icon icon="mdi-palette-swatch" color="brand"></v-icon> {{ t.app_result_title }}
+                    </h2>
+                    <div class="px-6 py-2 bg-pop_green/20 rounded-full text-pop_green text-xs font-black uppercase tracking-widest border-2 border-pop_green/30">
+                        TOP 30 DECODED ✨
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-4 mb-10">
+                    <div v-for="(c, i) in palette" :key="i" @click="selectedColor = c"
+                         class="aspect-square rounded-2xl border-4 border-panel shadow-md cursor-pointer transition-all hover:scale-110 relative group"
+                         :class="selectedColor?.hex === c.hex ? 'scale-110 !border-brand rotate-3 shadow-xl' : 'opacity-80 hover:opacity-100'"
+                         :style="{ backgroundColor: c.hex }">
+                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                             <v-icon icon="mdi-eye" size="20" color="white" class="drop-shadow-lg"></v-icon>
+                         </div>
+                    </div>
+                </div>
+
+                <div v-if="selectedColor" class="gummy-board p-8 bg-panel border-4 border-brand/30 flex flex-col md:flex-row items-center gap-8 shadow-2xl animate-pop-in">
+                    <div @click="copyHex(selectedColor.hex)" class="w-32 h-32 rounded-[2.5rem] shadow-2xl cursor-pointer border-8 border-white flex items-center justify-center group shrink-0 relative overflow-hidden" :style="{ backgroundColor: selectedColor.hex }">
+                        <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                            <v-icon icon="mdi-content-copy" color="white" size="40"></v-icon>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 text-center md:text-left">
+                        <div class="flex items-center justify-center md:justify-start gap-3 mb-4">
+                            <span class="text-4xl font-black font-mono tracking-tighter text-main">{{ selectedColor.hex }}</span>
+                            <span class="px-4 py-1 bg-brand text-white text-xs rounded-full font-black uppercase shadow-sm">INTEL ACTIVE</span>
+                        </div>
+                        <div class="bg-black/5 p-6 rounded-[1.8rem] border-2 border-border shadow-inner">
+                            <p class="text-[10px] font-black opacity-40 uppercase tracking-widest mb-2">Psychological Effect</p>
+                            <p class="font-bold text-lg text-main italic">"{{ getColorPsychology(selectedColor) }}"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else class="h-full flex flex-col items-center justify-center py-20 opacity-20 text-center">
+                <v-icon icon="mdi-image-filter-center-focus-strong" size="160" class="mb-6"></v-icon>
+                <h3 class="font-display text-4xl font-black uppercase tracking-tight">{{ t.app_empty_title }}</h3>
+                <p class="font-bold max-w-sm mt-2 uppercase text-xs">{{ t.app_empty_desc }}</p>
+            </div>
+        </div>
+    </div>
+</div>

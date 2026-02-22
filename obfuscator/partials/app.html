@@ -1,0 +1,92 @@
+<div class="flex flex-col h-full w-full font-sans relative overflow-hidden bg-core">
+
+    <div class="flex flex-col md:flex-row justify-between items-center p-4 border-b-4 border-[var(--border-color)] bg-panel z-20 shrink-0 gap-3 gummy-board rounded-none rounded-b-[2rem] shadow-sm relative">
+        <div class="flex w-full md:w-auto justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-brand rounded-full flex items-center justify-center border-4 border-[var(--border-color)] shadow-sm">
+                    <v-icon icon="mdi-shield-lock" color="white" size="28"></v-icon>
+                </div>
+                <div>
+                    <h1 class="font-display text-xl font-black text-main m-0 leading-none tracking-wide uppercase">
+                        {{ t.app_title }}
+                    </h1>
+                </div>
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="md:hidden text-xs text-brand font-black flex items-center gap-1 bg-core px-4 py-2 rounded-full border-4 border-[var(--border-color)] shadow-sm">
+                {{ t.btn_info }} <v-icon size="small">mdi-arrow-right</v-icon>
+            </button>
+        </div>
+
+        <div class="flex w-full md:w-auto gap-4 items-center justify-between md:justify-end">
+            <div class="bg-panel border-4 border-[var(--border-color)] px-5 py-2 rounded-full text-xs font-black text-brand uppercase shadow-sm flex items-center gap-2">
+                <v-icon icon="mdi-engine" size="small"></v-icon> {{ t.btn_app }}
+            </div>
+
+            <button onclick="window.switchAppTab('lander')" class="hidden md:flex text-xs text-main font-black items-center gap-1 bg-core px-5 py-2 rounded-full border-4 border-[var(--border-color)] hover:bg-brand hover:text-white transition shadow-sm">
+                <v-icon size="small">mdi-arrow-left</v-icon> {{ t.btn_info }}
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0 p-4 md:p-6 pb-40 md:pb-6 z-10 gap-4 md:gap-6">
+
+        <div class="flex flex-col gap-4 w-full md:w-1/2 h-auto md:h-full shrink-0">
+
+            <div class="gummy-board bg-panel p-4 flex flex-col gap-3 h-64 md:h-full min-h-0 relative group">
+                <div class="flex justify-between items-center z-10 border-b-4 border-[var(--border-color)] pb-3">
+                    <label class="block text-xs font-black font-display text-brand uppercase tracking-wider flex items-center gap-1">
+                        <v-icon icon="mdi-code-json" size="small"></v-icon> {{ t.label_source }}
+                    </label>
+
+                    <div class="flex gap-2">
+                        <button @click="clearInput" class="text-[10px] bg-core text-pop_pink border-2 border-[var(--border-color)] px-3 py-1 rounded-full hover:border-pop_pink transition-all font-black flex items-center gap-1">
+                            <v-icon icon="mdi-trash-can-outline" size="small"></v-icon> <span class="hidden sm:inline">{{ t.btn_clear }}</span>
+                        </button>
+                        <button @click="pasteToInput" class="text-[10px] bg-core text-brand border-2 border-[var(--border-color)] px-3 py-1 rounded-full hover:border-brand transition-all font-black flex items-center gap-1">
+                            <v-icon icon="mdi-clipboard-paste" size="small"></v-icon> <span class="hidden sm:inline">{{ t.btn_paste }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <textarea v-model="inputCode" class="w-full flex-1 p-4 text-sm font-mono text-main resize-none custom-scroll shadow-inner" :placeholder="t.ph_input"></textarea>
+            </div>
+
+            <div class="gummy-board bg-core p-4 border-4 border-[var(--border-color)]">
+                <label class="block text-xs font-black font-display text-muted mb-2 uppercase">{{ t.label_level }}</label>
+                <select v-model="levelSelect" class="w-full p-3 text-sm font-bold text-main cursor-pointer shadow-inner">
+                    <option value="low">{{ t.level_low }}</option>
+                    <option value="medium">{{ t.level_med }}</option>
+                    <option value="high">{{ t.level_high }}</option>
+                </select>
+            </div>
+
+            <button @click="runProcess" :disabled="isProcessing || !inputCode" class="btn-game w-full py-4 bg-brand text-white font-black font-display text-sm md:text-base uppercase flex justify-center items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                <v-icon v-if="!isProcessing" icon="mdi-lock"></v-icon>
+                <v-icon v-else icon="mdi-loading" class="animate-spin"></v-icon>
+                {{ isProcessing ? t.btn_locking : t.btn_lock }}
+            </button>
+
+        </div>
+
+        <div class="flex flex-col h-[400px] md:h-full w-full md:w-1/2">
+            <div class="gummy-board bg-panel p-4 flex-1 flex flex-col h-full min-h-0 border-4 border-brand/50">
+                <div class="flex justify-between items-center mb-3 border-b-4 border-[var(--border-color)] pb-3">
+                    <label class="block text-xs font-black font-display text-pop_pink uppercase tracking-wider flex items-center gap-1">
+                        <v-icon icon="mdi-bug-outline" size="small"></v-icon> {{ t.label_result }}
+                    </label>
+
+                    <button @click="copyResult" class="text-[10px] bg-brand text-white border-2 border-brand px-4 py-2 rounded-full hover:brightness-110 transition-all font-black flex items-center gap-1 shadow-sm">
+                        <v-icon icon="mdi-content-copy" size="small"></v-icon> {{ t.btn_copy }}
+                    </button>
+                </div>
+
+                <textarea readonly v-model="outputCode" class="w-full flex-1 bg-[rgba(0,0,0,0.02)] p-4 text-xs font-mono text-pop_pink focus:outline-none resize-none cursor-text custom-scroll border-none rounded-none" :placeholder="t.ph_output"></textarea>
+            </div>
+
+            <p class="text-center text-[10px] text-muted mt-4 font-bold bg-panel border-2 border-[var(--border-color)] rounded-full py-1 px-4 self-center uppercase tracking-widest shadow-sm">
+                <v-icon icon="mdi-shield-check" size="x-small" class="text-brand"></v-icon> {{ t.msg_local }}
+            </p>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,122 @@
+<div class="w-full px-6 py-4 flex justify-between items-center bg-panel/50 backdrop-blur-md border-b-4 border-border shrink-0 z-50">
+    <div class="flex items-center gap-4">
+        <div class="bg-pop_blue p-2 rounded-xl shadow-lg -rotate-6">
+            <v-icon icon="mdi-blur" color="white"></v-icon>
+        </div>
+        <span class="font-display font-black text-2xl tracking-tighter text-main">PIXEL<span class="text-pop_blue">OPS</span></span>
+    </div>
+    <button @click="currentTab = 'lander'" class="btn-game bg-panel border-4 border-border px-6 py-2 text-[10px] flex items-center gap-2 hover:text-brand transition-all">
+        <v-icon size="16">mdi-chevron-left-circle</v-icon> {{ t.back }}
+    </button>
+</div>
+
+<div class="flex-1 flex flex-col md:flex-row p-4 md:p-8 gap-8 relative overflow-hidden">
+
+    <div class="w-full md:w-[400px] flex flex-col gap-8 shrink-0 h-auto md:h-full overflow-y-auto no-scrollbar">
+
+        <div class="gummy-board p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-pop_blue opacity-5 rounded-bl-[4rem]"></div>
+            <h3 class="font-display font-black text-pop_blue text-2xl mb-8 flex items-center gap-3">
+                <v-icon>mdi-tune-vertical</v-icon> {{ t.step2 }}
+            </h3>
+
+            <div class="space-y-10 px-2">
+                <div class="group">
+                    <div class="flex justify-between text-xs font-black mb-4 uppercase tracking-widest opacity-60">
+                        <span>Quality Threshold</span>
+                        <span class="text-pop_blue">{{ (options.maxSizeMB * 1000).toFixed(0) }} KB</span>
+                    </div>
+                    <input v-model="options.maxSizeMB" type="range" min="0.1" max="5" step="0.1" class="w-full accent-pop_blue h-3 bg-border rounded-full appearance-none cursor-pointer">
+                    <div class="flex justify-between text-[10px] font-black mt-3 opacity-40 uppercase">
+                        <span>{{ t.aggressive }}</span>
+                        <span>{{ t.fidelity }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-black/5 p-5 rounded-[1.8rem] border-3 border-border/50">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-black text-main uppercase">Turbo Mode</span>
+                        <span class="text-[10px] font-bold opacity-40 uppercase">Web Workers Engine</span>
+                    </div>
+                    <v-switch v-model="options.useWebWorker" color="pop_blue" hide-details density="compact"></v-switch>
+                </div>
+            </div>
+        </div>
+
+        <div class="gummy-board p-8">
+            <div class="grid grid-cols-2 gap-6">
+                <div class="text-center p-4 bg-black/5 rounded-2xl border-2 border-border/50">
+                    <div class="text-[10px] font-black opacity-40 uppercase mb-1">{{ t.queue }}</div>
+                    <div class="text-3xl font-display font-black">{{ files.length }}</div>
+                </div>
+                <div class="text-center p-4 bg-pop_green/5 rounded-2xl border-3 border-pop_green/20">
+                    <div class="text-[10px] font-black text-pop_green uppercase mb-1">{{ t.saved }}</div>
+                    <div class="text-3xl font-display font-black text-pop_green">{{ totalSaved }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-auto pb-40 md:pb-6">
+            <button
+                @click="downloadAll"
+                :disabled="processedFiles.length === 0"
+                class="btn-game w-full py-8 bg-pop_green text-white text-3xl shadow-[0_12px_0_#04A077] hover:scale-[1.02] active:scale-95 transition-all"
+            >
+                {{ t.zipBtn }}
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 gummy-board border-8 relative flex flex-col bg-black/5 overflow-hidden shadow-inner">
+
+        <div
+            @click="$refs.fileInput.click()"
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="isDragging = false; handleFiles($event.dataTransfer.files)"
+            :class="isDragging ? 'bg-pop_blue/10 border-pop_blue scale-[0.98]' : 'bg-panel/40 border-border'"
+            class="m-6 p-10 border-4 border-dashed rounded-[3rem] transition-all duration-300 cursor-pointer text-center group shrink-0"
+        >
+            <input type="file" ref="fileInput" multiple accept="image/*" class="hidden" @change="handleFiles">
+            <div v-if="!isProcessing" class="py-4">
+                <div class="text-7xl mb-4 group-hover:scale-110 transition-transform">🧬</div>
+                <h4 class="font-display font-black text-2xl text-main uppercase tracking-tighter">{{ t.dropZone }}</h4>
+                <p class="text-xs font-black opacity-40 uppercase mt-2 tracking-widest">JPG • PNG • WEBP OK!</p>
+            </div>
+            <div v-else class="py-4 flex flex-col items-center">
+                <v-progress-circular indeterminate color="pop_pink" size="64" width="8"></v-progress-circular>
+                <h4 class="font-display font-black text-2xl text-pop_pink mt-6 animate-pulse uppercase tracking-widest">{{ t.loading }}</h4>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar px-8 pb-10 space-y-4">
+            <div v-if="files.length === 0" class="h-full flex flex-col items-center justify-center opacity-10 py-20">
+                <v-icon icon="mdi-image-filter-vintage" size="140"></v-icon>
+                <p class="font-display text-4xl font-black mt-4 uppercase">Awaiting Pixels...</p>
+            </div>
+
+            <div v-for="(file, idx) in files" :key="idx"
+                 class="bg-panel border-4 border-border p-5 rounded-[2rem] flex items-center justify-between group hover:border-brand transition-all shadow-sm">
+                <div class="flex items-center gap-6 min-w-0">
+                    <div class="w-16 h-16 bg-black/5 rounded-[1.5rem] flex items-center justify-center border-2 border-border shrink-0 relative overflow-hidden">
+                        <span v-if="file.status === 'done'" class="text-3xl animate-pop-in">✅</span>
+                        <span v-else-if="file.status === 'processing'" class="animate-spin text-3xl">🌀</span>
+                        <span v-else class="text-3xl opacity-30">⏳</span>
+                    </div>
+                    <div class="truncate">
+                        <div class="text-sm font-black truncate text-main uppercase tracking-tight">{{ file.original.name }}</div>
+                        <div class="flex gap-3 text-[11px] font-black opacity-40 mt-1 uppercase tracking-widest">
+                            <span>{{ formatSize(file.original.size) }}</span>
+                            <span v-if="file.compressed" class="text-pop_green font-black">➔ {{ formatSize(file.compressed.size) }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="file.compressed" class="bg-pop_green text-white px-5 py-2 rounded-2xl text-xs font-black shadow-lg border-b-4 border-black/20 animate-pop-in">
+                    -{{ Math.round((1 - file.compressed.size / file.original.size) * 100) }}%
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="max-w-4xl mx-auto px-6 pt-16 pb-32">
+    <div class="text-center mb-16">
+        <div class="opacity-0 animate-pop-in inline-block bg-brand text-white px-6 py-2 rounded-full text-sm font-black tracking-widest mb-8 shadow-lg transform rotate-[-2deg] hover:rotate-2 transition-transform cursor-pointer">
+            <i class="mdi mdi-eye-scan mr-2"></i> {{ t.lander_badge }}
+        </div>
+
+        <h1 class="opacity-0 animate-pop-in text-5xl md:text-7xl font-black mb-6 font-display text-main tracking-tight leading-tight" style="animation-delay: 0.1s;" v-html="t.lander_title"></h1>
+
+        <p class="opacity-0 animate-pop-in text-muted text-lg md:text-xl max-w-2xl mx-auto font-bold leading-relaxed mb-10" style="animation-delay: 0.2s;" v-html="t.lander_desc"></p>
+
+        <button @click="currentTab = 'app'" class="opacity-0 animate-pop-in btn-game bg-brand text-white px-12 py-5 text-xl mx-auto shadow-xl border-b-[8px] border-black/20" style="animation-delay: 0.3s;">
+            <i class="mdi mdi-pipette mr-2"></i> {{ t.lander_btn }}
+        </button>
+    </div>
+
+    <div class="opacity-0 animate-pop-in w-full max-w-4xl mx-auto rounded-[3rem] overflow-hidden border-8 border-panel bg-panel relative aspect-video shadow-2xl group mb-24 transform hover:scale-[1.02] transition-all duration-300" style="animation-delay: 0.4s;">
+        <div class="absolute inset-0 bg-gradient-to-br from-brand/20 via-transparent to-pop_pink/20 flex items-center justify-center overflow-hidden rounded-[2rem]">
+            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(var(--brand-color) 3px, transparent 3px); background-size: 40px 40px;"></div>
+
+            <div class="relative z-10 w-48 md:w-64 h-48 md:h-64 bg-white/90 backdrop-blur-md border-4 border-white rounded-full flex items-center justify-center shadow-2xl animate-bounce">
+                <div class="w-32 h-32 border-8 border-brand/30 rounded-full animate-spin-slow flex items-center justify-center">
+                    <v-icon icon="mdi-target-variant" size="80" class="text-brand"></v-icon>
+                </div>
+                <div class="absolute inset-0 bg-brand/5 rounded-full animate-pulse"></div>
+            </div>
+
+            <div class="absolute top-10 right-16 text-6xl animate-pulse">🎯</div>
+            <div class="absolute bottom-10 left-16 text-6xl animate-bounce" style="animation-delay: 1s;">🕵️‍♂️</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 opacity-0 animate-pop-in" style="animation-delay: 0.5s;">
+        <div class="gummy-board p-8 flex items-center gap-6 group hover:rotate-1 transition-transform">
+            <div class="w-16 h-16 shrink-0 bg-pop_pink rounded-2xl flex items-center justify-center shadow-lg border-b-4 border-black/10">
+                <i class="mdi mdi-brain text-3xl text-white"></i>
+            </div>
+            <div>
+                <h3 class="font-display text-xl font-black text-main">{{ t.feat_psych_title }}</h3>
+                <p class="text-sm font-bold text-muted">{{ t.feat_psych_desc }}</p>
+            </div>
+        </div>
+        <div class="gummy-board p-8 flex items-center gap-6 group hover:-rotate-1 transition-transform">
+            <div class="w-16 h-16 shrink-0 bg-pop_blue rounded-2xl flex items-center justify-center shadow-lg border-b-4 border-black/10">
+                <i class="mdi mdi-layers-triple text-3xl text-white"></i>
+            </div>
+            <div>
+                <h3 class="font-display text-xl font-black text-main">{{ t.feat_zone_title }}</h3>
+                <p class="text-sm font-bold text-muted">{{ t.feat_zone_desc }}</p>
+            </div>
+        </div>
+    </div>
+</div>

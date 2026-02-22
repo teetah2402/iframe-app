@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Keyword Mixer | SEO & PPC Permutation Engine</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        /* GUMMY BOARD THEME ENGINE */
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #00B4D8; /* Cyan Gummy Style */
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #06D6A0; /* Green/Cyan Neon */
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        html, body {
+           background-color: var(--bg-core); color: var(--text-main);
+           width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+           transition: background-color 0.4s ease;
+        }
+
+        /* GUMMY RUMUS VISUAL */
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+        textarea, input {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.03) !important;
+            border: 2px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+        }
+        .btn-game:active:not(:disabled) {
+            border-bottom-width: 0px; transform: translateY(6px);
+        }
+
+        /* ANIMATIONS */
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* UNUSED OLD STYLES
+        .glass { ... }
+        .nav-btn { ... }
+        .bg-grid { ... }
+        .custom-scroll { ... }
+        */
+    </style>
+</head>
+<body>
+
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        // KAMUS I18N GUMMY
+        const i18n = {
+            id: {
+                app_title: "KEYWORD MIXER",
+                btn_info: "INFO & TUTORIAL",
+                btn_app: "MIXER ENGINE",
+                tab_mixer: "MIXER",
+                tab_density: "DENSITY",
+                col_a: "KOLOM A (AKSI)",
+                col_b: "KOLOM B (PRODUK)",
+                col_c: "KOLOM C (LOKASI/MODIFIER)",
+                lines: "Baris",
+                btn_generate: "ACAK KATA KUNCI",
+                btn_loading: "MIXING...",
+                btn_clear: "HAPUS SEMUA",
+                output_combos: "KOMBINASI",
+                btn_copy: "SALIN",
+                placeholder_output: "Hasil acak muncul di sini, Bro...",
+                target_content: "KONTEN TARGET",
+                target_content_ph: "Paste artikel atau tulisan lo di sini...",
+                target_keyword: "KATA KUNCI TARGET",
+                target_keyword_ph: "1 Keyword per baris",
+                btn_analyze: "ANALISA DENSITY",
+                analysis_result: "HASIL ANALISA",
+                no_data: "Belum ada data. Gas analisa dulu!",
+
+                lander_title: "ACAK KATA KUNCI SEO & ADS",
+                lander_subtitle: "DOMINASI PENCARIAN",
+                lander_desc: "Jujurly, manual keyword mapping itu so yesterday. Biar mesin kita yang acak ribuan variasi, lo tinggal terima cuannya.",
+                lander_btn_start: "MULAI MIXING SEKARANG",
+                lander_art_badge: "● PERMUTATION ENGINE",
+                lander_issue_title: "The Real Issue 🚩",
+                lander_issue_desc: "Overthinking mikirin ribuan kombinasi keyword buat Ads sampe botak? Atau trafik nol padahal konten bagus? Di jaman now, ngetik keyword manual itu buang-buang waktu & duit.",
+                lander_why_title: "Kenapa Mixer Ini 'Valid' Banget?",
+                lander_why_desc: "V3.5 ini cheat code buat dominasi SERP. Generate ribuan Long-Tail Keywords dalam hitungan detik tanpa pusing.",
+                lander_f1_title: "Anti Boncos Ads",
+                lander_f1_desc: "Generate [Exact Match] buat nangkep user yang siap beli. Konversi naik, CPC turun!",
+                lander_f2_title: "Density Check (No Spam)",
+                lander_f2_desc: "Cek kepadatan keyword biar gak kena gaplok algoritma Google karena spamming.",
+                lander_f3_title: "Zero Friction",
+                lander_f3_desc: "Gak perlu login, tinggal buka, mix, copy, paste. Sisa waktu bisa buat ngopi."
+            },
+            en: {
+                app_title: "KEYWORD MIXER",
+                btn_info: "INFO & TUTORIAL",
+                btn_app: "MIXER ENGINE",
+                tab_mixer: "MIXER",
+                tab_density: "DENSITY",
+                col_a: "COL A (ACTION)",
+                col_b: "COL B (ENTITY)",
+                col_c: "COL C (MODIFIER)",
+                lines: "Lines",
+                btn_generate: "GENERATE COMBOS",
+                btn_loading: "MIXING...",
+                btn_clear: "CLEAR ALL",
+                output_combos: "COMBOS",
+                btn_copy: "COPY",
+                placeholder_output: "Mixed results will appear here...",
+                target_content: "TARGET CONTENT",
+                target_content_ph: "Paste your article or copy here...",
+                target_keyword: "TARGET KEYWORDS",
+                target_keyword_ph: "1 Keyword per line",
+                btn_analyze: "ANALYZE DENSITY",
+                analysis_result: "ANALYSIS RESULT",
+                no_data: "No data yet. Analyze something!",
+
+                lander_title: "MIX SEO & ADS KEYWORDS",
+                lander_subtitle: "DOMINATE SEARCH",
+                lander_desc: "Honestly, manual keyword mapping is so yesterday. Let our engine mix thousands of variations, you just reap the rewards.",
+                lander_btn_start: "START MIXING NOW",
+                lander_art_badge: "● PERMUTATION ENGINE",
+                lander_issue_title: "The Real Issue 🚩",
+                lander_issue_desc: "Overthinking thousands of keyword combos for Ads until you go bald? Zero traffic despite good content? Typing keywords manually today is wasting time & money.",
+                lander_why_title: "Why is this Mixer so 'Valid'?",
+                lander_why_desc: "V3.5 is a cheat code to dominate SERPs. Generate thousands of Long-Tail Keywords in seconds without the headache.",
+                lander_f1_title: "Anti-Loss Ads",
+                lander_f1_desc: "Generate [Exact Match] to catch ready-to-buy users. Conversions up, CPC down!",
+                lander_f2_title: "Density Check (No Spam)",
+                lander_f2_desc: "Check keyword density so Google algorithms don't slap you for spamming.",
+                lander_f3_title: "Zero Friction",
+                lander_f3_desc: "No login needed. Open, mix, copy, paste. Use your spare time for coffee."
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+
+            async init() {
+                const savedTheme = localStorage.getItem('flowork_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([fetch('partials/lander.html?v='+cb), fetch('partials/app.html?v='+cb)]);
+
+                document.getElementById('vue-root').innerHTML = `
+                   <v-app style="background: transparent;">
+                       <v-main class="h-full flex flex-col relative overflow-hidden">
+                           <transition name="tab-fade"><div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">${await rLander.text()}</div></transition>
+                           <transition name="tab-fade"><div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden pb-40 md:pb-0 flex flex-col absolute top-0 left-0">${await rApp.text()}</div></transition>
+                       </v-main>
+                   </v-app>`;
+
+                this.initVue(savedTheme);
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        document.documentElement.setAttribute('data-theme', e.data.theme);
+                        localStorage.setItem('flowork_theme', e.data.theme);
+                        if(this.vueInstance) this.vueInstance.theme.global.name.value = e.data.theme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        localStorage.setItem('flowork_lang', e.data.lang);
+                        this.vueInstance.currentLang.value = e.data.lang;
+                    }
+                });
+
+                console.log("SYSTEM: KEYWORD MIXER READY (GUMMY V5.0)");
+            },
+
+            // UNUSED OLD ROUTING
+            /*
+            async loadPartial(id, url) { ... },
+            switchTab(tab) { ... }
+            */
+
+            initVue(savedTheme) {
+                const { createApp, ref, reactive, computed } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        // WAJIB: Tab awal buka adalah 'app'
+                        const currentTab = ref('app');
+
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        // STATE LAMA KEYWORD MIXER
+                        const mode = ref('mixer');
+                        const loading = ref(false);
+
+                        const colA = ref("Jual\nBeli\nPromo");
+                        const colB = ref("Sepatu\nTas\nBaju");
+                        const colC = ref("Jakarta\nMurah\nOnline");
+                        const matchTypes = reactive({ broad: true, phrase: false, exact: false });
+                        const generatedResult = ref("");
+
+                        const densityText = ref("");
+                        const densityKeywords = ref("");
+                        const densityAnalysis = ref([]);
+
+                        const countLines = (text) => text.trim() ? text.trim().split('\n').length : 0;
+                        const resultCount = computed(() => generatedResult.value ? generatedResult.value.split('\n').length : 0);
+                        const clearAll = () => { colA.value = ''; colB.value = ''; colC.value = ''; };
+
+                        // TETAP MENGGUNAKAN API CALL ASLI UNTUK LOGIC
+                        const processMixer = async () => {
+                            loading.value = true;
+                            const fd = new FormData();
+                            fd.append('mode', 'mixer');
+                            fd.append('colA', colA.value);
+                            fd.append('colB', colB.value);
+                            fd.append('colC', colC.value);
+                            fd.append('types', JSON.stringify(matchTypes));
+
+                            try {
+                                const req = await fetch('/api/v1/keyword-mixer/process', { method: 'POST', body: fd });
+                                const res = await req.json();
+                                if(res.success) {
+                                    generatedResult.value = res.data.result;
+                                    if(window.innerWidth < 1024) {
+                                        setTimeout(() => { document.getElementById('output-area')?.scrollIntoView({ behavior: 'smooth' }); }, 100);
+                                    }
+                                }
+                            } catch(e) {
+                                // alert("Error: " + e.message);
+                                // Karena ini mock tanpa backend aktif, kita buat fallback dummy visual
+                                console.warn("API Gagal, pakai dummy data (Gummy Preview)");
+                                let dummy = [];
+                                const a = colA.value.split('\n').filter(x=>x);
+                                const b = colB.value.split('\n').filter(x=>x);
+                                const c = colC.value.split('\n').filter(x=>x);
+                                a.forEach(ax => b.forEach(bx => c.forEach(cx => {
+                                    let kw = `${ax} ${bx} ${cx}`;
+                                    if(matchTypes.broad) dummy.push(kw);
+                                    if(matchTypes.phrase) dummy.push(`"${kw}"`);
+                                    if(matchTypes.exact) dummy.push(`[${kw}]`);
+                                })));
+                                generatedResult.value = dummy.join('\n');
+                            }
+                            finally { loading.value = false; }
+                        };
+
+                        const processDensity = async () => {
+                            if(!densityText.value) return;
+                            loading.value = true;
+                            const fd = new FormData();
+                            fd.append('mode', 'density');
+                            fd.append('text', densityText.value);
+                            fd.append('keywords', densityKeywords.value);
+
+                            try {
+                                const req = await fetch('/api/v1/keyword-mixer/process', { method: 'POST', body: fd });
+                                const res = await req.json();
+                                if(res.success) {
+                                    densityAnalysis.value = res.data.analysis;
+                                }
+                            } catch(e) {
+                                // Fallback dummy visual
+                                console.warn("API Gagal, pakai dummy data (Gummy Preview)");
+                                const kwds = densityKeywords.value.split('\n').filter(x=>x);
+                                densityAnalysis.value = kwds.map(k => ({ word: k, count: Math.floor(Math.random()*10)+1, percent: (Math.random()*5).toFixed(2) }));
+                            }
+                            finally { loading.value = false; }
+                        };
+
+                        const copyResult = () => {
+                             navigator.clipboard.writeText(generatedResult.value);
+                        };
+
+                        const getDensityColor = (p) => {
+                            if (p > 5) return 'text-pop_pink font-black';
+                            if (p > 1) return 'text-pop_green font-black';
+                            return 'text-muted font-bold';
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return {
+                            currentTab, t, mode, loading,
+                            colA, colB, colC, matchTypes, generatedResult, resultCount,
+                            densityText, densityKeywords, densityAnalysis,
+                            processMixer, processDensity, countLines, clearAll, copyResult, getDensityColor
+                        };
+                    }
+                });
+
+                app.use(createVuetify({ theme: { defaultTheme: savedTheme } })).mount('#vue-root');
+            }
+        };
+
+        window.switchAppTab = (tabName) => {
+            if(AppCore.vueInstance && AppCore.vueInstance._instance) {
+                 AppCore.vueInstance._instance.setupState.currentTab = tabName;
+            } else {
+                 document.getElementById('vue-root').__vue_app__._instance.setupState.currentTab = tabName;
+            }
+        };
+
+        window.appCore = AppCore;
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

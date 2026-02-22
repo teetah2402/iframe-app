@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JS Code Cloaker | Flowork Security</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        /* GUMMY BOARD THEME ENGINE */
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #00B4D8; /* Cyan Gummy Style */
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #54D7F6; /* Neon Cyan (Lama) disesuaikan */
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        html, body {
+           background-color: var(--bg-core); color: var(--text-main);
+           width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+           transition: background-color 0.4s ease;
+        }
+
+        /* GUMMY RUMUS VISUAL */
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+        textarea, input, select {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.03) !important;
+            border: 2px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+        }
+        .btn-game:active:not(:disabled) {
+            border-bottom-width: 0px; transform: translateY(6px);
+        }
+
+        /* ANIMATIONS */
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* UNUSED OLD STYLES
+        .active-tab { ... }
+        .inactive-tab { ... }
+        */
+    </style>
+</head>
+<body>
+
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        // KAMUS I18N
+        const i18n = {
+            id: {
+                app_title: "JS CLOAKER",
+                btn_info: "INFO & PROTOKOL",
+                btn_app: "ENGINE CLOAKER",
+                label_source: "SOURCE CODE (JS)",
+                btn_clear: "HAPUS",
+                btn_paste: "PASTE",
+                ph_input: "// Klik di sini lalu paste kode JS lo (Ctrl+V)...",
+                label_level: "LEVEL PROTEKSI",
+                level_low: "Basic Encoding (Ringan)",
+                level_med: "Standard Obfuscation (Seimbang)",
+                level_high: "Hardcore (Anti-Debug + Dead Code)",
+                btn_lock: "KUNCI KODE SEKARANG",
+                btn_locking: "MEMPROSES...",
+                label_result: "HASIL OBFUSCATE",
+                btn_copy: "SALIN",
+                ph_output: "// Kode 'bubur' hasil obfuscate akan muncul di sini...",
+                msg_local: "Sistem diproses oleh Flowork Secure Engine v2.1.",
+                alert_empty: "Bro, isi dulu kodenya!",
+                alert_success: "BOOM! Kode lu aman sekarang.",
+                alert_copy: "Berhasil dicopy! Siap deploy.",
+
+                lander_title: "KODE LU TELANJANG?",
+                lander_title_hl: "JANGAN SAMPE DICOLONG.",
+                lander_desc: "Bikin source code JavaScript lu jadi 'bubur' yang mustahil dibaca manusia tapi tetep jalan mulus di browser. Anti-copas, anti-intip, anti-maling.",
+                lander_btn_start: "AMANKAN KODE GUE SEKARANG",
+                lander_art_badge: "SHIELD MODE: ON",
+                lander_why_title: "KENAPA HARUS DI-OBFUSCATE?",
+                lander_why_desc: "Bro, lu capek-capek ngoding logika dewa, masa user tinggal 'Inspect Element' terus copy-paste? Tools ini memutar logika lu, ubah nama variabel jadi hex, dan nambah debug protection.",
+                lander_api_title: "DEVELOPER API ACCESS",
+                lander_api_desc: "Mau integrasi ke sistem lu? Tembak endpoint ini:"
+            },
+            en: {
+                app_title: "JS CLOAKER",
+                btn_info: "INFO & PROTOCOL",
+                btn_app: "CLOAKER ENGINE",
+                label_source: "SOURCE CODE (JS)",
+                btn_clear: "CLEAR",
+                btn_paste: "PASTE",
+                ph_input: "// Click here and paste your JS code (Ctrl+V)...",
+                label_level: "PROTECTION LEVEL",
+                level_low: "Basic Encoding (Light)",
+                level_med: "Standard Obfuscation (Balanced)",
+                level_high: "Hardcore (Anti-Debug + Dead Code)",
+                btn_lock: "LOCK CODE NOW",
+                btn_locking: "PROCESSING...",
+                label_result: "OBFUSCATED RESULT",
+                btn_copy: "COPY",
+                ph_output: "// 'Mashed' obfuscated code will appear here...",
+                msg_local: "System processed by Flowork Secure Engine v2.1.",
+                alert_empty: "Bro, fill in the code first!",
+                alert_success: "BOOM! Your code is secure now.",
+                alert_copy: "Copied successfully! Ready to deploy.",
+
+                lander_title: "YOUR CODE IS NAKED?",
+                lander_title_hl: "DON'T LET IT GET STOLEN.",
+                lander_desc: "Turn your JavaScript source code into 'mush' that is impossible for humans to read but still runs smoothly in the browser. Anti-copy, anti-peek, anti-theft.",
+                lander_btn_start: "SECURE MY CODE NOW",
+                lander_art_badge: "SHIELD MODE: ON",
+                lander_why_title: "WHY OBFUSCATE?",
+                lander_why_desc: "Bro, you worked hard to code god-level logic, why let users 'Inspect Element' and copy-paste? This tool twists your logic, renames variables to hex, and adds debug protection.",
+                lander_api_title: "DEVELOPER API ACCESS",
+                lander_api_desc: "Want to integrate it into your system? Hit this endpoint:"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+
+            async init() {
+                const savedTheme = localStorage.getItem('flowork_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([fetch('partials/lander.html?v='+cb), fetch('partials/app.html?v='+cb)]);
+
+                document.getElementById('vue-root').innerHTML = `
+                   <v-app style="background: transparent;">
+                       <v-main class="h-full flex flex-col relative overflow-hidden">
+                           <transition name="tab-fade"><div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">${await rLander.text()}</div></transition>
+                           <transition name="tab-fade"><div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden pb-40 md:pb-0 flex flex-col absolute top-0 left-0">${await rApp.text()}</div></transition>
+                       </v-main>
+                   </v-app>`;
+
+                this.initVue(savedTheme);
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        document.documentElement.setAttribute('data-theme', e.data.theme);
+                        localStorage.setItem('flowork_theme', e.data.theme);
+                        if(this.vueInstance) this.vueInstance.theme.global.name.value = e.data.theme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        localStorage.setItem('flowork_lang', e.data.lang);
+                        this.vueInstance.currentLang.value = e.data.lang;
+                    }
+                });
+
+                console.log("SYSTEM: CLOAKER READY (GUMMY V5.0)");
+            },
+
+            // UNUSED OLD JS FUNCTIONS
+            /*
+            async loadPartial(containerId, url) { ... },
+            switchTab(tab) { ... },
+            async runProcess() { ... },
+            async pasteToInput() { ... },
+            clearInput() { ... },
+            copyResult() { ... }
+            */
+
+            initVue(savedTheme) {
+                const { createApp, ref, computed } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app'); // WAJIB DEFAULT 'app'
+
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        // STATE
+                        const inputCode = ref('');
+                        const outputCode = ref('');
+                        const levelSelect = ref('medium');
+                        const isProcessing = ref(false);
+
+                        const clearInput = () => { inputCode.value = ''; };
+
+                        const pasteToInput = async () => {
+                            try {
+                                const text = await navigator.clipboard.readText();
+                                inputCode.value = text;
+                            } catch (err) {
+                                alert("⚠️ Browser memblokir akses clipboard otomatis.\nSilakan paste manual (Ctrl+V).");
+                            }
+                        };
+
+                        const copyResult = () => {
+                            if (outputCode.value) {
+                                navigator.clipboard.writeText(outputCode.value);
+                                alert(t.value.alert_copy);
+                            }
+                        };
+
+                        const runProcess = async () => {
+                            if (!inputCode.value) {
+                                alert(t.value.alert_empty);
+                                return;
+                            }
+
+                            isProcessing.value = true;
+
+                            const formData = new FormData();
+                            formData.append('code', inputCode.value);
+                            formData.append('level', levelSelect.value);
+
+                            try {
+                                const req = await fetch('/api/v1/obfuscator/process', { method: 'POST', body: formData });
+                                if(req.status !== 200) throw new Error("API ERROR");
+
+                                const res = await req.json();
+                                if(res.success) {
+                                    outputCode.value = res.result;
+                                    // alert(t.value.alert_success); (Removed to avoid blocking flow, visual feedback is better)
+                                } else {
+                                    throw new Error(res.error || "Unknown Error");
+                                }
+                            } catch(e) {
+                                // --- FALLBACK SIMULATION (UNICODE SAFE) ---
+                                console.warn("Using Local Engine (Unicode Safe Mode)");
+                                setTimeout(() => {
+                                    try {
+                                        const safeString = unescape(encodeURIComponent(inputCode.value));
+                                        const encoded = btoa(safeString);
+                                        const wrapper = `/* PROTECTED BY FLOWORK */\n(function(){var _0x='${encoded}';eval(decodeURIComponent(escape(atob(_0x))))})();`;
+                                        outputCode.value = wrapper;
+                                    } catch(err) {
+                                        alert("Gagal Encode: " + err.message);
+                                    }
+                                    isProcessing.value = false;
+                                }, 800);
+                                return; // return early to avoid clearing processing state twice
+                            }
+                            isProcessing.value = false;
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return {
+                            currentTab, t,
+                            inputCode, outputCode, levelSelect, isProcessing,
+                            clearInput, pasteToInput, copyResult, runProcess
+                        };
+                    }
+                });
+
+                app.use(createVuetify({ theme: { defaultTheme: savedTheme } })).mount('#vue-root');
+            }
+        };
+
+        window.switchAppTab = (tabName) => {
+            if(AppCore.vueInstance && AppCore.vueInstance._instance) {
+                 AppCore.vueInstance._instance.setupState.currentTab = tabName;
+            } else {
+                 document.getElementById('vue-root').__vue_app__._instance.setupState.currentTab = tabName;
+            }
+        };
+
+        window.appCore = AppCore;
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

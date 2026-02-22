@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Watermark Ops | Gummy Edition</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      const getSavedTheme = () => localStorage.getItem('flowork_os_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', getSavedTheme());
+
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F72585;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #FF006E;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* HIDE SCROLLBAR SECARA GLOBAL */
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;     /* Firefox */
+        }
+        *::-webkit-scrollbar {
+            display: none;             /* Chrome, Safari, Opera */
+        }
+
+        html, body {
+            background-color: var(--bg-core); color: var(--text-main);
+            width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+            transition: background-color 0.4s ease; margin: 0; padding: 0;
+            user-select: none;
+        }
+
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+
+        /* Input Look "Diukir" */
+        textarea, input:not([type="range"]):not([type="color"]) {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.05) !important;
+            border: 3px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 800 !important;
+            padding: 12px 20px !important;
+        }
+
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.25); border-radius: 1.8rem;
+            font-weight: 800; transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .btn-game:active:not(:disabled) { border-bottom-width: 0px; transform: translateY(6px); }
+        .btn-game:disabled { opacity: 0.5; cursor: not-allowed; border-bottom-width: 2px; }
+
+        .tab-fade-enter-active { transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.95) translateY(30px); }
+    </style>
+</head>
+<body>
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        const i18n = {
+            id: {
+                appName: "WaterOps", startBtn: "GAS PROTEKSI! 🚀",
+                heroTitle: "Bikin Aset Lu", heroSub: "Anti-Maling!",
+                heroDesc: "Tandain foto lu biar gak dicomot kompetitor. Sekali klik, langsung aman!",
+                step1: "1. FOTONYA MANA? 📸", step2: "2. GAYA WATERMARK 🎨", step3: "3. POSISI MANTAP 📍",
+                processBtn: "GASKAN SEKARANG!", loading: "SABAR, LAGI DISIKAT...",
+                dragHint: "GESER SESUKA HATI!", tiled: "PENUHIN", center: "TENGAH",
+                dropZone: "TARUH FOTO DI SINI", scale: "UKURAN", opacity: "TEBEL/TIPIS",
+                logo: "LOGO", text: "TEKS", back: "KEMBALI"
+            },
+            en: {
+                appName: "WaterOps", startBtn: "PROTECT NOW! 🚀",
+                heroTitle: "Secure Your", heroSub: "Visual Assets!",
+                heroDesc: "Mark your territory. Batch process multiple images instantly and stay safe!",
+                step1: "1. SELECT FILES 📸", step2: "2. STYLE TYPE 🎨", step3: "3. POSITIONING 📍",
+                processBtn: "START BATCH OPS!", loading: "PROCESSING...",
+                dragHint: "DRAG FREELY!", tiled: "TILED", center: "CENTER",
+                dropZone: "DROP IMAGES HERE", scale: "SCALE", opacity: "OPACITY",
+                logo: "LOGO", text: "TEXT", back: "BACK"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+            async init() {
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([
+                    fetch('partials/lander.html?v=' + cb),
+                    fetch('partials/app.html?v=' + cb)
+                ]);
+
+                document.getElementById('vue-root').innerHTML = `
+                    <v-app style="background: transparent;">
+                        <v-main class="h-full relative overflow-hidden flex flex-col">
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">
+                                    ${await rLander.text()}
+                                </div>
+                            </transition>
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col absolute top-0 left-0">
+                                    ${await rApp.text()}
+                                </div>
+                            </transition>
+                        </v-main>
+                    </v-app>`;
+
+                this.initVue();
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        const newTheme = e.data.theme;
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('flowork_os_theme', newTheme);
+                        if (this.vueInstance) this.vueInstance.theme.global.name.value = newTheme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        const newLang = e.data.lang;
+                        localStorage.setItem('flowork_lang', newLang);
+                        this.vueInstance.currentLang.value = newLang;
+                    }
+                });
+            },
+
+            initVue() {
+                const { createApp, ref, computed, watch } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app');
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        const targetImages = ref([]);
+                        const watermarkType = ref('text');
+                        const watermarkSource = ref(null);
+                        const isProcessing = ref(false);
+                        const progress = ref(0);
+
+                        const config = ref({
+                            opacity: 0.5, scale: 20, posX: 0.5, posY: 0.5,
+                            text: 'WATERMARK OPS', color: '#FFFFFF', rotation: 0, isTiled: false
+                        });
+
+                        const dragState = { active: false, startX: 0, startY: 0, startPosX: 0, startPosY: 0 };
+
+                        const updatePreview = async () => {
+                            const canvas = document.getElementById('preview-canvas');
+                            if (!canvas || targetImages.value.length === 0) return;
+                            const ctx = canvas.getContext('2d');
+                            const baseImg = await loadImage(targetImages.value[0]);
+                            const previewScale = Math.min(1, 800 / baseImg.width);
+                            canvas.width = baseImg.width * previewScale;
+                            canvas.height = baseImg.height * previewScale;
+                            ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
+                            await drawWatermark(ctx, canvas.width, canvas.height);
+                        };
+
+                        const drawWatermark = async (ctx, w, h) => {
+                            ctx.save();
+                            ctx.globalAlpha = config.value.opacity;
+                            let wmObj, wmW, wmH;
+                            if (watermarkType.value === 'image' && watermarkSource.value) {
+                                wmObj = watermarkSource.value;
+                                const ratio = wmObj.width / wmObj.height;
+                                wmW = (w * config.value.scale) / 100;
+                                wmH = wmW / ratio;
+                            } else {
+                                const fontSize = (w * config.value.scale) / 100;
+                                ctx.font = `bold ${fontSize}px Fredoka, sans-serif`;
+                                ctx.fillStyle = config.value.color;
+                                ctx.textAlign = "center";
+                                ctx.textBaseline = "middle";
+                                wmW = ctx.measureText(config.value.text).width;
+                                wmH = fontSize;
+                                wmObj = { type: 'text' };
+                            }
+
+                            if (config.value.isTiled) {
+                                ctx.translate(w/2, h/2);
+                                ctx.rotate((config.value.rotation * Math.PI) / 180);
+                                ctx.translate(-w/2, -h/2);
+                                for(let i=0; i<3; i++) {
+                                    for(let j=0; j<3; j++) {
+                                        renderItem(ctx, wmObj, (i*w/3)+w/6, (j*h/3)+h/6, wmW, wmH);
+                                    }
+                                }
+                            } else {
+                                ctx.translate(w * config.value.posX, h * config.value.posY);
+                                ctx.rotate((config.value.rotation * Math.PI) / 180);
+                                renderItem(ctx, wmObj, 0, 0, wmW, wmH);
+                            }
+                            ctx.restore();
+                        };
+
+                        const renderItem = (ctx, obj, x, y, w, h) => {
+                            if (obj.type === 'text') ctx.fillText(config.value.text, x, y);
+                            else ctx.drawImage(obj, x - w/2, y - h/2, w, h);
+                        };
+
+                        const loadImage = (file) => new Promise(res => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => { const img = new Image(); img.onload = () => res(img); img.src = e.target.result; };
+                            reader.readAsDataURL(file);
+                        });
+
+                        const handleFiles = (e) => { targetImages.value = Array.from(e.target.files); updatePreview(); };
+
+                        const handleWMImage = (e) => {
+                            const file = e.target.files[0];
+                            if(!file) return;
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                                const img = new Image();
+                                img.onload = () => { watermarkSource.value = img; updatePreview(); };
+                                img.src = ev.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        };
+
+                        const startDrag = (e) => {
+                            if(config.value.isTiled) return;
+                            const touch = e.touches ? e.touches[0] : e;
+                            dragState.active = true;
+                            dragState.startX = touch.clientX;
+                            dragState.startY = touch.clientY;
+                            dragState.startPosX = config.value.posX;
+                            dragState.startPosY = config.value.posY;
+                        };
+
+                        const onDrag = (e) => {
+                            if(!dragState.active) return;
+                            const touch = e.touches ? e.touches[0] : e;
+                            const rect = document.getElementById('preview-canvas').getBoundingClientRect();
+                            config.value.posX = dragState.startPosX + (touch.clientX - dragState.startX) / rect.width;
+                            config.value.posY = dragState.startPosY + (touch.clientY - dragState.startY) / rect.height;
+                            updatePreview();
+                        };
+
+                        const endDrag = () => dragState.active = false;
+                        const setPreset = (p) => {
+                            config.value.isTiled = (p === 'tile');
+                            if(p === 'c') { config.value.posX = 0.5; config.value.posY = 0.5; }
+                            updatePreview();
+                        };
+
+                        const processBatch = async () => {
+                            if(targetImages.value.length === 0) return;
+                            isProcessing.value = true;
+                            const zip = new JSZip();
+                            const folder = zip.folder("protected_assets");
+                            for(let i=0; i<targetImages.value.length; i++) {
+                                progress.value = Math.round(((i+1)/targetImages.value.length)*100);
+                                const canvas = document.createElement('canvas');
+                                const img = await loadImage(targetImages.value[i]);
+                                canvas.width = img.width; canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                await drawWatermark(ctx, canvas.width, canvas.height);
+                                const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+                                folder.file(`wm_${targetImages.value[i].name}`, blob);
+                            }
+                            const content = await zip.generateAsync({type:"blob"});
+                            saveAs(content, "flowork_watermarked.zip");
+                            isProcessing.value = false;
+                        };
+
+                        watch(config, () => updatePreview(), { deep: true });
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return {
+                            currentTab, t, targetImages, watermarkType, config, isProcessing, progress,
+                            handleFiles, handleWMImage, startDrag, onDrag, endDrag, setPreset, processBatch
+                        };
+                    }
+                });
+
+                app.use(createVuetify({
+                    theme: { defaultTheme: document.documentElement.getAttribute('data-theme') || 'dark' }
+                })).mount('#vue-root');
+            }
+        };
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

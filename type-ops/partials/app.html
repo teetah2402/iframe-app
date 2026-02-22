@@ -1,0 +1,101 @@
+<div class="flex flex-col h-full w-full font-sans">
+
+    <div class="flex flex-col md:flex-row justify-between items-center p-4 border-b-4 border-[var(--border-color)] bg-panel z-10 shrink-0 gap-3 gummy-board rounded-none rounded-b-[1.5rem] shadow-sm">
+        <div class="flex w-full md:w-auto justify-between items-center">
+            <div class="flex items-center gap-3">
+                <v-icon icon="mdi-format-letter-case" color="var(--brand-color)" size="28"></v-icon>
+                <div>
+                    <h1 class="font-display text-xl font-bold text-main m-0 leading-none tracking-wide">
+                        {{ t.app_title }}
+                    </h1>
+                </div>
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="md:hidden text-xs text-brand font-bold flex items-center gap-1 bg-core px-3 py-1 rounded-full border-2 border-[var(--border-color)]">
+                {{ t.app_btn_back }} <v-icon size="small">mdi-arrow-right</v-icon>
+            </button>
+        </div>
+
+        <div class="flex w-full md:w-auto gap-2 items-center justify-between md:justify-end">
+            <div class="flex bg-core rounded-[1.5rem] border-2 border-[var(--border-color)] p-1 w-full md:w-auto justify-center">
+                <button @click="mode = 'styles'" :class="mode === 'styles' ? 'bg-panel text-brand shadow-sm border-2 border-[var(--border-color)]' : 'text-muted'" class="flex-1 md:flex-none justify-center px-4 py-2 text-xs font-bold rounded-full transition-all flex items-center gap-1">
+                    <v-icon icon="mdi-format-font" size="small"></v-icon> {{ t.app_tab_styles }}
+                </button>
+                <button @click="mode = 'repeater'" :class="mode === 'repeater' ? 'bg-panel text-brand shadow-sm border-2 border-[var(--border-color)]' : 'text-muted'" class="flex-1 md:flex-none justify-center px-4 py-2 text-xs font-bold rounded-full transition-all flex items-center gap-1">
+                    <v-icon icon="mdi-repeat" size="small"></v-icon> {{ t.app_tab_repeater }}
+                </button>
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="hidden md:flex text-xs text-brand font-bold items-center gap-1 bg-core px-4 py-2 rounded-full border-2 border-[var(--border-color)] hover:bg-panel transition">
+                <v-icon size="small">mdi-arrow-left</v-icon> {{ t.app_btn_back }}
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0 p-2 md:p-4 gap-4">
+
+        <div class="w-full md:w-80 flex flex-col shrink-0 min-h-[40vh] md:min-h-0 gummy-board flex-grow-0 md:flex-grow">
+            <div class="p-3 md:p-4 border-b-2 border-[var(--border-color)] flex justify-between items-center shrink-0">
+                <span class="text-xs text-muted font-bold font-display uppercase tracking-wider">{{ t.app_source_input }}</span>
+                <button @click="inputText = ''" class="text-xs text-red-500 font-bold flex items-center gap-1 px-2 py-1 rounded hover:bg-red-50 transition">
+                    <v-icon icon="mdi-trash-can-outline" size="small"></v-icon> {{ t.app_btn_clear }}
+                </button>
+            </div>
+            <div class="flex-1 p-3 md:p-4 min-h-0">
+                <textarea v-model="inputText" class="w-full h-full p-4 focus:border-brand transition" :placeholder="t.app_input_placeholder"></textarea>
+            </div>
+            <div class="p-3 md:p-4 border-t-2 border-[var(--border-color)] grid grid-cols-2 gap-2 shrink-0">
+                <button @click="addSpacer" class="bg-core text-muted py-2 rounded-xl text-xs font-bold border-2 border-[var(--border-color)] flex flex-col items-center justify-center gap-1 hover:bg-panel transition">
+                    <v-icon icon="mdi-keyboard-space" size="small"></v-icon> {{ t.app_btn_spacer }}
+                </button>
+                <button @click="copyInput" class="bg-core text-brand py-2 rounded-xl text-xs font-bold border-2 border-[var(--border-color)] flex flex-col items-center justify-center gap-1 hover:bg-panel transition">
+                    <v-icon icon="mdi-content-copy" size="small"></v-icon> {{ t.app_btn_copy_raw }}
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col overflow-hidden relative min-h-[50vh] md:min-h-0 gummy-board">
+
+            <div v-if="mode === 'styles'" class="flex-1 p-4 overflow-y-auto">
+                <div v-if="!inputText" class="h-full flex flex-col items-center justify-center opacity-50 pointer-events-none select-none">
+                    <v-icon icon="mdi-keyboard-outline" size="64" class="mb-4 text-muted"></v-icon>
+                    <div class="text-sm md:text-base font-display font-bold text-muted text-center">{{ t.app_awaiting_input }}</div>
+                </div>
+
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3 pb-32 md:pb-0">
+                    <div v-for="(style, key) in styles" :key="key" class="bg-core border-2 border-[var(--border-color)] p-4 rounded-2xl group cursor-pointer hover:border-brand hover:shadow-md transition relative overflow-hidden active:scale-[0.98] duration-100" @click="copyText(transform(inputText, key))">
+                        <div class="flex justify-between items-start mb-2 border-b-2 border-[var(--border-color)] pb-2">
+                            <span class="text-[10px] text-muted font-bold font-display uppercase tracking-widest">{{ style.name }}</span>
+                            <span class="opacity-100 md:opacity-0 group-hover:opacity-100 text-[10px] font-bold px-2 py-1 rounded-full bg-brand text-white flex items-center gap-1 transition">
+                                <v-icon icon="mdi-content-copy" size="x-small"></v-icon> {{ t.app_btn_copy }}
+                            </span>
+                        </div>
+                        <div class="text-base md:text-lg text-main break-words leading-relaxed font-bold min-h-[30px]">
+                            {{ transform(inputText, key) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="mode === 'repeater'" class="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+                <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 bg-core p-4 rounded-2xl border-2 border-[var(--border-color)] shrink-0">
+                    <div class="flex-1">
+                        <label class="text-xs text-muted font-bold font-display block mb-1 uppercase">{{ t.app_repeat_count }}</label>
+                        <input v-model="repeatCount" type="number" class="w-full py-2 px-3 focus:border-brand text-lg" min="1" max="1000">
+                    </div>
+                    <div class="flex items-center gap-2 bg-panel border-2 border-[var(--border-color)] px-4 py-3 rounded-xl justify-center">
+                        <input type="checkbox" v-model="repeatNewLine" id="newLine" class="accent-brand w-5 h-5 cursor-pointer">
+                        <label for="newLine" class="text-sm font-bold text-main cursor-pointer select-none">{{ t.app_new_line }}</label>
+                    </div>
+                    <button @click="copyRepeated" class="btn-game bg-brand text-white px-6 py-3 rounded-[1.5rem] font-bold text-sm uppercase">
+                        {{ t.app_btn_copy_result }}
+                    </button>
+                </div>
+
+                <div class="flex-1 bg-core border-2 border-[var(--border-color)] rounded-2xl p-4 overflow-y-auto relative group mb-32 md:mb-0">
+                    <span class="absolute top-3 right-3 text-[10px] font-bold text-muted border-2 border-[var(--border-color)] bg-panel px-3 py-1 rounded-full">{{ t.app_preview_output }}</span>
+                    <div class="text-main whitespace-pre-wrap break-words font-bold text-sm mt-8">{{ repeatedText }}</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

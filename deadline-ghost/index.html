@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Deadline Ghost | The Art of Buying Time</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        /* GUMMY BOARD THEME ENGINE */
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F72585;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #FF4D6D; /* Agak nge-pink/merah buat Deadline */
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        html, body {
+           background-color: var(--bg-core); color: var(--text-main);
+           width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+           transition: background-color 0.4s ease;
+        }
+
+        /* GUMMY RUMUS VISUAL */
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+        textarea, input, .carved-box {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.03) !important;
+            border: 2px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+        }
+        .btn-game:active:not(:disabled) {
+            border-bottom-width: 0px; transform: translateY(6px);
+        }
+
+        /* ANIMATIONS */
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* UNUSED OLD STYLES
+        .glitch-text { ... }
+        .brand-font { ... }
+        */
+    </style>
+</head>
+<body>
+
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        // KAMUS I18N
+        const i18n = {
+            id: {
+                app_title: "DEADLINE GHOST",
+                app_subtitle: "FILE SABOTAGE TOOL",
+                btn_info: "INFO & TAKTIK",
+                btn_app: "SABOTASE",
+                app_corrupter_title: "FILE CORRUPTER",
+                app_corrupter_desc: "TARGET: HEADER BYTES & MAGIC NUMBERS",
+                app_drop_title: "TARUH FILE DI SINI",
+                app_drop_desc: "Word, Excel, PDF, ZIP, Gambar (Maks 100MB)",
+                app_ready: "SIAP DISABOTASE",
+                app_level: "TINGKAT KERUSAKAN: ",
+                app_level_value: "FATAL (HEADER HANCUR)",
+                app_btn_execute: "EKSEKUSI SABOTASE",
+                app_btn_executing: "SABOTAGING...",
+                app_btn_done: "MISI BERHASIL",
+                app_status_wait: "SECURE: PROSES LOKAL DI BROWSER LO.",
+
+                lander_badge: "⚠️ ALAT DARURAT AKADEMIK/KERJA",
+                lander_title: "BELI WAKTU 24 JAM",
+                lander_subtitle: "SAAT DEADLINE MEPET.",
+                lander_desc_1: "Tugas belum kelar? Laporan masih kosong? Tapi Dosen/Bos minta file dikirim SEKARANG?",
+                lander_desc_2: "Jangan nyerah. Rusak file-nya. Kirim file rusak itu. Beli waktu sampai mereka minta kirim ulang besok.",
+                lander_badge_art: "● SABOTAGE MODE",
+                lander_btn_start: "MULAI SABOTASE SEKARANG",
+                lander_tactic_title: "TACTICAL ADVICE:",
+                lander_tactic_quote: "\"Teknologi itu gak sempurna. Manfaatin glitch itu. File yang rusak (corrupted) bukan tanda lo males, tapi 'kesalahan teknis' yang ngasih lo napas tambahan.\"",
+                lander_art_title: "Seni Membeli Waktu (The Art of Stalling)",
+                lander_art_desc: "Jam 23:55. Deadline 5 menit lagi. File Word lo masih kosong melompong. Pilihannya cuma dua: Nyerah (Dapet E) atau Pake DEADLINE GHOST. Prinsipnya simpel: Kalau lo gak bisa kelarin kerjaan tepat waktu, bikin seolah-olah teknologinya yang salah.",
+                lander_why_title: "Kenapa Rename File Manual Itu Gagal?",
+                lander_why_desc: "Banyak amatir nyoba nipu sistem pake cara bego: Rename file JPG jadi Tugas.docx. Gagal Total. Word bakal bilang 'Encoding Error', bukan 'File Corrupted'. Dosen langsung tau lo bohong. Lo butuh Digital Poison yang ngerusak Magic Numbers di dalem file biar kelihatan kayak kerusakan alami.",
+                lander_sop_title: "SOP Operasional (Wajib Baca)",
+                lander_sop_1_title: "Siapin Umpan (The Bait):",
+                lander_sop_1_desc: "Jangan upload file 0 KB. Copy paste artikel Wikipedia ke Word sampe sizenya 2-5 MB. Biar meyakinkan.",
+                lander_sop_2_title: "Eksekusi Sabotase:",
+                lander_sop_2_desc: "Pake tools ini buat ngerusak file umpan tadi. Download hasilnya.",
+                lander_sop_3_title: "Akting Oscar:",
+                lander_sop_3_desc: "Kirim pas mepet deadline. Besoknya pas dosen komplain, pasang muka kaget: 'Hah? Rusak Pak? Waduh internet semalam error kali. Bentar saya kirim ulang.'",
+                lander_system_msg: "> SYSTEM MSG: USE WITH CAUTION. DO NOT OVERUSE."
+            },
+            en: {
+                app_title: "DEADLINE GHOST",
+                app_subtitle: "FILE SABOTAGE TOOL",
+                btn_info: "INFO & TACTICS",
+                btn_app: "SABOTAGE",
+                app_corrupter_title: "FILE CORRUPTER",
+                app_corrupter_desc: "TARGET: HEADER BYTES & MAGIC NUMBERS",
+                app_drop_title: "DROP FILE HERE",
+                app_drop_desc: "Word, Excel, PDF, ZIP, Image (Max 100MB)",
+                app_ready: "READY TO SABOTAGE",
+                app_level: "CORRUPTION LEVEL: ",
+                app_level_value: "FATAL (HEADER DESTROYED)",
+                app_btn_execute: "EXECUTE CORRUPTION",
+                app_btn_executing: "SABOTAGING...",
+                app_btn_done: "MISSION ACCOMPLISHED",
+                app_status_wait: "SECURE: PROCESS HAPPENS LOCALLY IN YOUR BROWSER.",
+
+                lander_badge: "⚠️ EMERGENCY ACADEMIC/WORK TOOL",
+                lander_title: "BUY 24 HOURS",
+                lander_subtitle: "WHEN THE DEADLINE IS TIGHT.",
+                lander_desc_1: "Task unfinished? Report still empty? But your Boss/Teacher wants it NOW?",
+                lander_desc_2: "Don't give up. Corrupt the file. Send the broken file. Buy time until they ask for a re-send tomorrow.",
+                lander_badge_art: "● SABOTAGE MODE",
+                lander_btn_start: "START SABOTAGE NOW",
+                lander_tactic_title: "TACTICAL ADVICE:",
+                lander_tactic_quote: "\"Technology isn't perfect. Use that glitch. A corrupted file isn't a sign of laziness, but a 'technical error' that gives you extra breathing room.\"",
+                lander_art_title: "The Art of Stalling",
+                lander_art_desc: "11:55 PM. Deadline in 5 mins. Your Word file is empty. Two choices: Give up (Get an F) or use DEADLINE GHOST. Simple principle: If you can't finish the work on time, make it look like technology failed.",
+                lander_why_title: "Why Manual Renaming Fails?",
+                lander_why_desc: "Amateurs try to fool the system stupidly: Rename a JPG to Assignment.docx. Total Failure. Word says 'Encoding Error', not 'File Corrupted'. They will know you lied. You need Digital Poison to destroy the Magic Numbers inside so it looks like natural corruption.",
+                lander_sop_title: "Operational SOP (Must Read)",
+                lander_sop_1_title: "Prepare the Bait:",
+                lander_sop_1_desc: "Don't upload a 0 KB file. Copy-paste Wikipedia articles to Word until it's 2-5 MB. Make it convincing.",
+                lander_sop_2_title: "Execute Sabotage:",
+                lander_sop_2_desc: "Use this tool to corrupt the bait file. Download the result.",
+                lander_sop_3_title: "Oscar Acting:",
+                lander_sop_3_desc: "Send it right at the deadline. Tomorrow when they complain, act shocked: 'Huh? Corrupted? Must be my bad internet last night. Let me resend.'",
+                lander_system_msg: "> SYSTEM MSG: USE WITH CAUTION. DO NOT OVERUSE."
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+
+            async init() {
+                const savedTheme = localStorage.getItem('flowork_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([fetch('partials/lander.html?v='+cb), fetch('partials/app.html?v='+cb)]);
+
+                document.getElementById('vue-root').innerHTML = `
+                   <v-app style="background: transparent;">
+                       <v-main class="h-full flex flex-col relative overflow-hidden">
+                           <transition name="tab-fade"><div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">${await rLander.text()}</div></transition>
+                           <transition name="tab-fade"><div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden pb-40 md:pb-0 flex flex-col absolute top-0 left-0">${await rApp.text()}</div></transition>
+                       </v-main>
+                   </v-app>`;
+
+                this.initVue(savedTheme);
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        document.documentElement.setAttribute('data-theme', e.data.theme);
+                        localStorage.setItem('flowork_theme', e.data.theme);
+                        if(this.vueInstance) this.vueInstance.theme.global.name.value = e.data.theme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        localStorage.setItem('flowork_lang', e.data.lang);
+                        this.vueInstance.currentLang.value = e.data.lang;
+                    }
+                });
+
+                console.log("SYSTEM: DEADLINE GHOST READY (GUMMY V5.0)");
+            },
+
+            // UNUSED OLD DOM MANIPULATION FUNCTIONS (ZOMBIE CODE)
+            /*
+            loadPartial(id, url) { ... },
+            switchTab(tab) { ... },
+            handleFileSelect(input) { ... },
+            async corruptFile() { ... }
+            */
+
+            initVue(savedTheme) {
+                const { createApp, ref, computed } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        // Wajib tab default "app" sesuai rule
+                        const currentTab = ref('app');
+
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        // STATE DEADLINE GHOST
+                        const selectedFile = ref(null);
+                        const progress = ref(0);
+                        const statusLog = ref('');
+                        const isCorrupting = ref(false);
+                        const isDone = ref(false);
+
+                        const formattedSize = computed(() => {
+                            if (!selectedFile.value) return '0 MB';
+                            return (selectedFile.value.size / 1024 / 1024).toFixed(2) + ' MB';
+                        });
+
+                        const handleFileSelect = (event) => {
+                            const file = event.target.files[0];
+                            if (file) {
+                                selectedFile.value = file;
+                                statusLog.value = "TARGET LOCKED. WAITING FOR COMMAND.";
+                                progress.value = 0;
+                                isDone.value = false;
+                            }
+                        };
+
+                        const triggerFileSelect = () => {
+                            document.getElementById('fileInput').click();
+                        };
+
+                        const corruptFile = async () => {
+                            if (!selectedFile.value) return;
+
+                            isCorrupting.value = true;
+                            progress.value = 30;
+                            statusLog.value = "INJECTING GARBAGE DATA INTO HEADERS...";
+
+                            // Simulasi delay biar berasa dramatis
+                            await new Promise(r => setTimeout(r, 800));
+                            progress.value = 60;
+
+                            try {
+                                const buffer = await selectedFile.value.arrayBuffer();
+                                const uint8View = new Uint8Array(buffer);
+
+                                // CORRUPTION LOGIC (Hancurkan Header file)
+                                const damageLevel = Math.min(1000, uint8View.length);
+                                for (let i = 0; i < damageLevel; i++) {
+                                    uint8View[i] = Math.floor(Math.random() * 255);
+                                }
+
+                                // Random damage di tengah file
+                                const midPoint = Math.floor(uint8View.length / 2);
+                                for (let i = midPoint; i < midPoint + 50; i++) {
+                                    if(i < uint8View.length) uint8View[i] = Math.floor(Math.random() * 255);
+                                }
+
+                                progress.value = 100;
+
+                                const corruptedBlob = new Blob([uint8View], { type: selectedFile.value.type });
+                                const url = URL.createObjectURL(corruptedBlob);
+
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = "CORRUPTED_" + selectedFile.value.name;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+
+                                statusLog.value = "SABOTAGE COMPLETE. FILE DESTROYED.";
+                                isCorrupting.value = false;
+                                isDone.value = true;
+
+                                setTimeout(() => {
+                                    isDone.value = false;
+                                    statusLog.value = "READY FOR NEXT TARGET.";
+                                    progress.value = 0;
+                                    selectedFile.value = null; // Reset biar bisa masukin file baru
+                                }, 3000);
+
+                            } catch (e) {
+                                console.error(e);
+                                statusLog.value = "ERROR: SYSTEM FAILURE.";
+                                isCorrupting.value = false;
+                            }
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return {
+                            currentTab, t,
+                            selectedFile, progress, statusLog, isCorrupting, isDone, formattedSize,
+                            handleFileSelect, triggerFileSelect, corruptFile
+                        };
+                    }
+                });
+
+                app.use(createVuetify({ theme: { defaultTheme: savedTheme } })).mount('#vue-root');
+            }
+        };
+
+        // Bridge function untuk menggantikan logic lama HTML
+        window.switchAppTab = (tabName) => {
+            if(AppCore.vueInstance && AppCore.vueInstance._instance) {
+                 AppCore.vueInstance._instance.setupState.currentTab = tabName;
+            } else {
+                 document.getElementById('vue-root').__vue_app__._instance.setupState.currentTab = tabName;
+            }
+        };
+
+        window.appCore = AppCore;
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

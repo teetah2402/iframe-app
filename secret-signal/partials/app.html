@@ -1,0 +1,97 @@
+<div class="flex flex-col h-full w-full bg-core overflow-y-auto md:overflow-hidden pb-40 md:pb-0">
+
+    <div class="flex h-20 bg-panel border-b-4 border-border shrink-0 items-center justify-between px-6 sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-brand p-1.5 rounded-xl rotate-3 shadow-lg"><v-icon icon="mdi-zap" color="white" size="20"></v-icon></div>
+            <span class="font-display font-black text-main text-lg uppercase tracking-tight">SIGNAL<span class="text-brand">V5</span></span>
+        </div>
+        <button @click="currentTab = 'lander'" class="btn-game bg-panel border-4 border-border px-6 py-2 text-[10px] flex items-center gap-2 hover:text-brand transition-all">
+            <v-icon size="14">mdi-information-outline</v-icon> <span class="hidden md:inline">{{ t.manifesto }}</span>
+        </button>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row p-4 md:p-8 gap-8 h-full overflow-hidden">
+
+        <div class="w-full md:w-[450px] flex flex-col gap-6 shrink-0 min-h-[60vh]">
+            <div class="gummy-board p-2 bg-black/5 flex gap-2 border-2">
+                <button @click="subTab = 'encode'" :class="subTab === 'encode' ? 'bg-brand text-white shadow-xl' : 'text-muted'" class="flex-1 py-4 rounded-[1.5rem] font-black text-xs transition-all uppercase">{{ t.encTab }}</button>
+                <button @click="subTab = 'decode'" :class="subTab === 'decode' ? 'bg-pop_blue text-white shadow-xl' : 'text-muted'" class="flex-1 py-4 rounded-[1.5rem] font-black text-xs transition-all uppercase">{{ t.decTab }}</button>
+            </div>
+
+            <div class="gummy-board flex-1 p-8 space-y-8 overflow-y-auto no-scrollbar border-4 bg-panel">
+                <div v-if="subTab === 'encode'" class="space-y-6 animate-pop-in">
+                    <div>
+                        <label class="text-[10px] font-black text-muted uppercase ml-4 block mb-2">{{ t.payloadLabel }}</label>
+                        <textarea v-model="encodeData.text" rows="6" class="w-full p-6 text-sm font-mono" :placeholder="t.payloadPlaceholder"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-muted uppercase ml-4 block mb-2">{{ t.keyLabel }}</label>
+                        <input v-model="encodeData.pass" type="password" class="w-full p-4 text-sm font-mono" placeholder="**********">
+                    </div>
+                    <button @click="handleEncode" class="btn-game w-full py-6 bg-brand text-white text-xl shadow-[0_12px_0_rgba(0,0,0,0.2)]">{{ t.genBtn }}</button>
+                </div>
+
+                <div v-else class="space-y-6 animate-pop-in">
+                    <div class="p-6 gummy-board border-dashed border-4 border-muted/20 text-center">
+                        <v-icon icon="mdi-file-music" color="muted" size="48" class="mb-4 opacity-30"></v-icon>
+                        <p class="text-[10px] font-black text-muted uppercase leading-relaxed">
+                            Siapkan file WAV lo,<br>lalu gunakan panel kanan untuk mulai dekripsi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 gummy-board border-4 flex flex-col items-center justify-center p-10 relative overflow-hidden bg-black/5">
+            <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(var(--text-muted) 1.5px, transparent 1.5px); background-size: 30px 30px;"></div>
+
+            <div v-if="subTab === 'encode'" class="text-center animate-pop-in w-full relative z-10">
+                <div v-if="!encodeData.lastBlob" class="opacity-30">
+                    <v-icon icon="mdi-waveform" color="brand" size="120" class="animate-pulse"></v-icon>
+                    <h3 class="font-display font-black text-main text-3xl uppercase mt-4">{{ t.waitingTitle }}</h3>
+                    <p class="text-[11px] font-mono text-muted uppercase mt-2">{{ t.waitingDesc }}</p>
+                </div>
+                <div v-else class="flex flex-col items-center">
+                    <div class="w-48 h-48 gummy-board flex items-center justify-center bg-brand/10 border-brand mb-8 rotate-3">
+                        <v-icon icon="mdi-music-check" color="brand" size="80"></v-icon>
+                    </div>
+                    <h3 class="font-display font-black text-main text-4xl uppercase">{{ t.downloadReady }}</h3>
+                    <button @click="downloadEncoded" class="btn-game mt-10 px-12 py-6 bg-brand text-white text-2xl uppercase font-black transition-all hover:scale-105 active:scale-95 shadow-xl relative z-20">
+                        {{ t.downloadBtn }}
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="subTab === 'decode'" class="w-full h-full flex flex-col items-center justify-center animate-pop-in relative z-10">
+
+                <div v-if="!decodeState.result" class="w-full h-full flex flex-col items-center justify-center">
+                    <div class="relative w-full max-w-lg aspect-square gummy-board border-4 border-dashed border-border flex flex-col items-center justify-center bg-panel hover:border-pop_blue transition-all group overflow-hidden cursor-pointer">
+                        <input type="file" @change="handleFileSelect" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept="audio/*,video/*">
+                        <v-icon icon="mdi-cloud-search" :color="decodeState.file ? 'pop_blue' : 'muted'" size="100" class="group-hover:scale-110 transition-transform mb-6"></v-icon>
+                        <h3 class="font-display font-black text-main text-xl uppercase px-10 text-center">{{ decodeState.file ? decodeState.fileName : t.uploadHint }}</h3>
+                    </div>
+                    <button v-if="decodeState.file" @click="executeDecode" class="btn-game mt-10 px-12 py-6 bg-pop_blue text-white text-2xl uppercase font-black shadow-xl">
+                        {{ t.decryptBtn }}
+                    </button>
+                </div>
+
+                <div v-else class="w-full h-full flex flex-col animate-pop-in">
+                    <div class="flex-1 gummy-board p-10 bg-panel border-4 border-brand flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <span class="text-[10px] font-black text-brand uppercase tracking-widest">{{ t.resultLabel }}</span>
+                            <v-icon icon="mdi-text-box-check-outline" color="brand"></v-icon>
+                        </div>
+                        <div class="flex-1 bg-black/5 rounded-[1.5rem] p-8 overflow-y-auto border-2 border-dashed">
+                            <p class="font-mono text-xl text-main leading-relaxed break-all">{{ decodeState.result }}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-8">
+                            <button @click="navigator.clipboard.writeText(decodeState.result); alert(t.copyBtn)" class="btn-game py-4 bg-brand text-white uppercase text-sm font-black shadow-lg">{{ t.copyBtn }}</button>
+                            <button @click="decodeState.result = ''; decodeState.file = null" class="btn-game py-4 bg-panel border-4 border-border text-muted uppercase text-sm font-black shadow-lg">{{ t.resetBtn }}</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

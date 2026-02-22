@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Palette Thief | Visual Extractor V5.0</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      // Persistence Logic: Get Theme Before Render
+      const getSavedTheme = () => {
+        try { return localStorage.getItem('flowork_os_theme') || 'dark'; }
+        catch(e) { return 'dark'; }
+      };
+      document.documentElement.setAttribute('data-theme', getSavedTheme());
+
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F72585;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #FF006E;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* HIDE SCROLLBAR GLOBAL */
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+
+        html, body {
+            background-color: var(--bg-core); color: var(--text-main);
+            width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+            transition: background-color 0.4s ease;
+        }
+
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+
+        /* Input Diukir Look */
+        textarea, input {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.03) !important;
+            border: 2px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-game:active { border-bottom-width: 0px; transform: translateY(6px); }
+
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    </style>
+</head>
+<body class="no-scrollbar">
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        const i18n = {
+            id: {
+                title: "PALETTE THIEF", subtitle: "Visual Extractor V5.0",
+                scan: "MULAI HUNTING", hunting: "MENCURI...", copy: "Kopi!", empty_url: "Mana URL-nya, Bos?",
+                back: "KEMBALI", results: "Hasil Rampokan", placeholder: "https://www.website-keren.com"
+            },
+            en: {
+                title: "PALETTE THIEF", subtitle: "Visual Extractor V5.0",
+                scan: "START HUNTING", hunting: "STEALING...", copy: "Copied!", empty_url: "Where is the URL, Bro?",
+                back: "BACK", results: "Loot Found", placeholder: "https://www.cool-website.com"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+            async init() {
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([
+                    fetch('partials/lander.html?v='+cb),
+                    fetch('partials/app.html?v='+cb)
+                ]);
+
+                document.getElementById('vue-root').innerHTML = `
+                    <v-app style="background: transparent;">
+                        <v-main class="h-full flex flex-col relative overflow-hidden">
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto no-scrollbar absolute top-0 left-0 bg-transparent">
+                                    ${await rLander.text()}
+                                </div>
+                            </transition>
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col absolute top-0 left-0 bg-transparent">
+                                    ${await rApp.text()}
+                                </div>
+                            </transition>
+
+                            <transition name="tab-fade">
+                                <div v-if="toast.show" class="fixed bottom-10 left-1/2 -translate-x-1/2 gummy-board px-8 py-4 z-[100] flex items-center gap-3 animate-bounce bg-pop_green text-black">
+                                    <i class="mdi mdi-check-circle text-2xl"></i>
+                                    <span class="font-bold font-display uppercase tracking-widest">{{ toast.msg }}</span>
+                                </div>
+                            </transition>
+                        </v-main>
+                    </v-app>`;
+
+                this.initVue();
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        document.documentElement.setAttribute('data-theme', e.data.theme);
+                        localStorage.setItem('flowork_os_theme', e.data.theme);
+                        if(this.vueInstance) this.vueInstance.theme.global.name.value = e.data.theme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        localStorage.setItem('flowork_lang', e.data.lang);
+                        this.vueInstance.currentLang.value = e.data.lang;
+                    }
+                });
+            },
+
+            initVue() {
+                const { createApp, ref, computed } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app');
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        const urlInput = ref('');
+                        const isHunting = ref(false);
+                        const colors = ref([]);
+                        const toast = ref({ show: false, msg: '' });
+
+                        const showToast = (msg) => {
+                            toast.value = { show: true, msg };
+                            setTimeout(() => toast.value.show = false, 2000);
+                        };
+
+                        const startScan = async () => {
+                            if(!urlInput.value) return showToast(t.value.empty_url);
+                            isHunting.value = true;
+                            colors.value = [];
+                            try {
+                                const res = await fetch('/api/v1/palette-thief/process', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({ url: urlInput.value })
+                                });
+                                const result = await res.json();
+                                if(result.success && result.data.colors) {
+                                    colors.value = result.data.colors;
+                                } else {
+                                    showToast("Gagal rampok data!");
+                                }
+                            } catch (e) {
+                                showToast("Error: " + e.message);
+                            } finally {
+                                isHunting.value = false;
+                            }
+                        };
+
+                        const copyColor = (hex) => {
+                            navigator.clipboard.writeText(hex);
+                            showToast(`${t.value.copy} ${hex}`);
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return { currentTab, t, urlInput, isHunting, colors, startScan, copyColor, toast };
+                    }
+                });
+
+                app.use(createVuetify({ theme: { defaultTheme: getSavedTheme() } })).mount('#vue-root');
+            }
+        };
+
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

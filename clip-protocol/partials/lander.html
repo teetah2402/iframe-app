@@ -1,0 +1,112 @@
+<div class="max-w-4xl mx-auto px-4 md:px-6 pt-10 md:pt-16 pb-24 pop-in font-sans">
+
+    <div class="text-center mb-10 md:mb-16">
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-pop_pink/20 text-brand rounded-full text-[10px] font-bold mb-6 tracking-widest shadow-sm border-2 border-brand">
+            <v-icon icon="mdi-star-four-points" size="small" class="animate-spin-slow"></v-icon> {{ t.lander_badge }}
+        </div>
+        <h1 class="text-3xl md:text-6xl font-black mb-4 font-display text-main tracking-tight leading-tight uppercase">
+            {{ t.lander_title }} <br>
+            <span class="text-brand underline decoration-wavy decoration-pop_yellow">{{ t.lander_title_hl }}</span> <br>
+            {{ t.lander_title_2 }}
+        </h1>
+        <p class="text-muted max-w-2xl mx-auto text-sm md:text-lg leading-relaxed font-bold">
+            {{ t.lander_desc }}
+        </p>
+    </div>
+
+    <div class="gummy-board w-full max-w-3xl mx-auto overflow-hidden relative aspect-video group mb-10 md:mb-16 transform hover:scale-[1.02] transition-all duration-300 bg-core flex flex-col items-center justify-center p-4 cursor-pointer" onclick="window.switchAppTab('app')">
+
+        <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-pop_blue rounded-full opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-[-15%] left-[-10%] w-56 h-56 bg-pop_yellow rounded-full opacity-30 animate-bounce" style="animation-duration: 5s;"></div>
+
+        <div class="relative z-10 flex items-center justify-center">
+
+            <div class="w-40 md:w-48 h-72 md:h-80 bg-panel border-4 border-[var(--border-color)] rounded-[2.5rem] shadow-[0_20px_0_0_rgba(0,0,0,0.05)] flex flex-col p-2 relative overflow-hidden group-hover:-translate-y-2 transition-transform duration-500">
+                <div class="w-1/3 h-4 bg-core border-2 border-[var(--border-color)] rounded-full mx-auto mb-2 shrink-0"></div>
+
+                <div class="w-full flex-1 bg-core border-4 border-[var(--border-color)] rounded-2xl relative overflow-hidden flex items-center justify-center mb-2">
+                    <v-icon icon="mdi-play-circle" size="48" class="text-brand/50"></v-icon>
+
+                    <div class="absolute inset-4 border-2 border-dashed border-brand rounded-lg animate-pulse z-10 flex flex-col justify-end p-2">
+                         <div class="w-full h-6 bg-black/40 border-2 border-pop_yellow rounded flex items-center justify-center">
+                            <div class="w-2/3 h-2 bg-white rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full h-16 bg-core border-2 border-[var(--border-color)] rounded-xl shrink-0 p-2 flex flex-col gap-1 overflow-hidden relative">
+                    <div class="absolute top-0 bottom-0 w-1 bg-brand left-1/2 z-20"></div>
+
+                    <div class="w-[200%] h-4 bg-pop_blue/30 rounded flex gap-1 animate-[slideLeft_3s_linear_infinite]">
+                        <div class="w-16 h-full bg-pop_blue rounded border border-pop_blue/50"></div>
+                        <div class="w-20 h-full bg-pop_blue rounded border border-pop_blue/50"></div>
+                        <div class="w-12 h-full bg-pop_blue rounded border border-pop_blue/50"></div>
+                    </div>
+                    <div class="w-[200%] h-4 bg-pop_green/30 rounded flex items-center px-1 animate-[slideLeft_3s_linear_infinite]">
+                        <div class="w-full flex gap-0.5 opacity-50">
+                            <div class="w-1 h-3 bg-pop_green rounded"></div><div class="w-1 h-2 bg-pop_green rounded"></div>
+                            <div class="w-1 h-4 bg-pop_green rounded"></div><div class="w-1 h-1 bg-pop_green rounded"></div>
+                            <div class="w-1 h-3 bg-pop_green rounded"></div><div class="w-1 h-2 bg-pop_green rounded"></div>
+                            <div class="w-1 h-4 bg-pop_green rounded"></div><div class="w-1 h-1 bg-pop_green rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute -right-8 bottom-10 transform rotate-45 animate-bounce z-20">
+                <v-icon icon="mdi-scissors-cutting" size="64" class="text-pop_pink drop-shadow-lg"></v-icon>
+            </div>
+        </div>
+
+        <div class="absolute bottom-4 right-4 bg-panel px-4 py-2 rounded-full border-4 border-[var(--border-color)] text-brand font-black text-[10px] md:text-xs shadow-md z-30 flex items-center gap-2">
+            <v-icon icon="mdi-eye-check" size="small" class="text-brand"></v-icon>
+            {{ t.lander_art_badge }}
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    </style>
+
+    <div class="text-center mb-16 md:mb-20">
+        <button onclick="window.switchAppTab('app')" class="btn-game w-full md:w-auto bg-brand hover:brightness-110 text-white font-display py-4 px-10 rounded-[1.5rem] text-sm md:text-lg uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 mx-auto">
+            <v-icon icon="mdi-lightning-bolt"></v-icon> {{ t.lander_btn_start }}
+        </button>
+    </div>
+
+    <div class="max-w-3xl mx-auto text-sm md:text-base border-t-4 border-[var(--border-color)] pt-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <div class="gummy-board bg-panel p-6 flex flex-col items-center text-center group">
+                <div class="w-16 h-16 bg-pop_green/20 rounded-full flex items-center justify-center text-pop_green border-4 border-pop_green mb-4 group-hover:scale-110 transition-transform">
+                    <v-icon icon="mdi-shield-check" size="large"></v-icon>
+                </div>
+                <h3 class="text-main font-black font-display mb-2 uppercase">{{ t.lander_f1_title }}</h3>
+                <p class="text-muted font-bold text-xs leading-relaxed">
+                    {{ t.lander_f1_desc }}
+                </p>
+            </div>
+
+            <div class="gummy-board bg-panel p-6 flex flex-col items-center text-center group">
+                <div class="w-16 h-16 bg-pop_blue/20 rounded-full flex items-center justify-center text-pop_blue border-4 border-pop_blue mb-4 group-hover:scale-110 transition-transform">
+                    <v-icon icon="mdi-format-align-center" size="large"></v-icon>
+                </div>
+                <h3 class="text-main font-black font-display mb-2 uppercase">{{ t.lander_f2_title }}</h3>
+                <p class="text-muted font-bold text-xs leading-relaxed">
+                    {{ t.lander_f2_desc }}
+                </p>
+            </div>
+
+            <div class="gummy-board bg-panel p-6 flex flex-col items-center text-center group">
+                <div class="w-16 h-16 bg-pop_yellow/20 rounded-full flex items-center justify-center text-pop_yellow border-4 border-pop_yellow mb-4 group-hover:scale-110 transition-transform">
+                    <v-icon icon="mdi-rocket-launch" size="large"></v-icon>
+                </div>
+                <h3 class="text-main font-black font-display mb-2 uppercase">{{ t.lander_f3_title }}</h3>
+                <p class="text-muted font-bold text-xs leading-relaxed">
+                    {{ t.lander_f3_desc }}
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>

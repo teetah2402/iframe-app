@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meta Ghost | Bikin Fotomu Aman Sambil Main!</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/exifreader@4.12.0/dist/exif-reader.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Persistence Logic: Get Theme Before Render
+      const getSavedTheme = () => {
+        try {
+          return localStorage.getItem('flowork_os_theme') || 'dark';
+        } catch (e) { return 'dark'; }
+      };
+      document.documentElement.setAttribute('data-theme', getSavedTheme());
+
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F72585;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #FF006E;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        html, body {
+            background-color: var(--bg-core); color: var(--text-main);
+            width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+            transition: background-color 0.4s ease; margin: 0; padding: 0;
+        }
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+        textarea, input {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.03) !important;
+            border: 2px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+        }
+        .btn-game:active:not(:disabled) { border-bottom-width: 0px; transform: translateY(6px); }
+
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .leaflet-container { background: var(--bg-panel); border-radius: 2rem; border: 4px solid var(--border-color); }
+    </style>
+</head>
+<body>
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        const i18n = {
+            id: {
+                appName: "MetaGhost", badge: "🕵️‍♂️ Agen Rahasia",
+                title1: "Bongkar Rahasia", title2: "Fotomu!",
+                desc: "Tiap foto nyimpen rahasia lokasi & data kameramu. Yuk intip & bersihin biar aman pas di-post!",
+                btnLaunch: "Mulai Scan Foto 🚀",
+                docTitle: "Kenapa Harus Dihapus? 🧩",
+                docP1: "Foto yang kamu ambil itu diem-diem ngasih tau lokasi akurat ke orang lain lho!",
+                docF1: "✨ <strong>Anti-Ngelag:</strong> Langsung scan di browser, gak pake lemot.",
+                docF2: "✨ <strong>Detektif Lokasi:</strong> Liat di peta, di mana fotomu diambil.",
+                docF3: "✨ <strong>Sapu Bersih:</strong> Hapus semua jejak rahasia dengan 1 klik.",
+                eof: "Main aman, privasi terjaga! 🛡️",
+                appUpload: "Upload Fotomu 📸", appUploadSub: "JPG, PNG, HEIC Boleh!",
+                appChangeFile: "Ganti Foto", appLoadSample: "Pake Contoh Aja",
+                appScore: "SKOR KEAMANAN", appSafe: "AMAN BOS! 😎", appDanger: "BAHAYA! 🚨",
+                appThreats: "Awas Ada Bahaya:", appManifest: "Daftar Rahasia",
+                appWaiting: "Nungguin fotonya nih...",
+                appNoMap: "GAK ADA LOKASI 🗺️", appNoMapSub: "Fotomu aman dari pelacakan GPS.",
+                appWaitSatellite: "MENUNGGU SATELIT 🛰️...",
+                appHex: "KODE RAHASIA (HEX)", appScrub: "BERSIHKAN DATA! 🧹", appBack: "Cara Main"
+            },
+            en: {
+                appName: "MetaGhost", badge: "🕵️‍♂️ Secret Agent",
+                title1: "Uncover Photo", title2: "Secrets!",
+                desc: "Every photo hides location & camera data. Let's peek & clean it before you post!",
+                btnLaunch: "Start Scanning 🚀",
+                docTitle: "Why Clean It? 🧩",
+                docP1: "Photos you take secretly reveal your exact location to anyone who downloads them!",
+                docF1: "✨ <strong>No Lag:</strong> Scans right in your browser instantly.",
+                docF2: "✨ <strong>Location Detective:</strong> See exactly where it was taken on a map.",
+                docF3: "✨ <strong>Sweep Clean:</strong> Erase all hidden tracks with 1 click.",
+                eof: "Play safe, stay private! 🛡️",
+                appUpload: "Upload Photo 📸", appUploadSub: "JPG, PNG, HEIC OK!",
+                appChangeFile: "Change Photo", appLoadSample: "Try a Sample",
+                appScore: "SAFETY SCORE", appSafe: "SAFE BRO! 😎", appDanger: "DANGER! 🚨",
+                appThreats: "Threats Found:", appManifest: "Secret List",
+                appWaiting: "Waiting for photo...",
+                appNoMap: "NO LOCATION 🗺️", appNoMapSub: "Your photo is safe from GPS tracking.",
+                appWaitSatellite: "WAITING FOR SATELLITE 🛰️...",
+                appHex: "SECRET CODE (HEX)", appScrub: "SCRUB DATA! 🧹", appBack: "How to Play"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+            async init() {
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([
+                    fetch('partials/lander.html?v=' + cb),
+                    fetch('partials/app.html?v=' + cb)
+                ]);
+
+                document.getElementById('vue-root').innerHTML = `
+                    <v-app style="background: transparent;">
+                        <v-main class="h-full flex flex-col relative overflow-hidden">
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">
+                                    ${await rLander.text()}
+                                </div>
+                            </transition>
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col absolute top-0 left-0 pb-40 md:pb-0">
+                                    ${await rApp.text()}
+                                </div>
+                            </transition>
+                        </v-main>
+                    </v-app>`;
+
+                this.initVue();
+
+                // FIXED: Theme persistence with localStorage
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        const newTheme = e.data.theme;
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('flowork_os_theme', newTheme); // Simpan di sini!
+                        if(this.vueInstance) this.vueInstance.theme.global.name.value = newTheme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        const newLang = e.data.lang;
+                        localStorage.setItem('flowork_lang', newLang); // Simpan bahasa juga!
+                        this.vueInstance.currentLang.value = newLang;
+                    }
+                });
+            },
+
+            initVue() {
+                const { createApp, ref, computed, nextTick } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app');
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        const fileInput = ref(null);
+                        const filePreview = ref(null);
+                        const displayMeta = ref({});
+                        const hexDump = ref('');
+                        const gpsData = ref(null);
+                        const analysisResult = ref(null);
+                        const loading = ref(false);
+                        let map = null, marker = null;
+
+                        const switchTab = (tab) => {
+                            currentTab.value = tab;
+                            if(tab === 'app') nextTick(() => { if(map) map.invalidateSize(); });
+                        };
+
+                        const triggerUpload = () => fileInput.value && fileInput.value.click();
+
+                        const processFile = async (e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            gpsData.value = null;
+                            analysisResult.value = null;
+                            if(map && marker) map.removeLayer(marker);
+
+                            const reader = new FileReader();
+                            reader.onload = (ev) => { filePreview.value = ev.target.result; };
+                            reader.readAsDataURL(file);
+
+                            const hexReader = new FileReader();
+                            hexReader.onload = (ev) => {
+                                const u8 = new Uint8Array(ev.target.result.slice(0, 500));
+                                hexDump.value = Array.from(u8).map(b => b.toString(16).padStart(2,'0').toUpperCase()).join(' ');
+                            };
+                            hexReader.readAsArrayBuffer(file);
+
+                            try {
+                                const tags = await ExifReader.load(file);
+                                const keys = ['Make', 'Model', 'DateTimeOriginal', 'Software', 'ISOSpeedRatings'];
+                                displayMeta.value = {};
+                                keys.forEach(k => { if(tags[k]) displayMeta.value[k] = tags[k].description; });
+
+                                if (tags['GPSLatitude'] && tags['GPSLongitude']) {
+                                    const lat = parseFloat(tags['GPSLatitude'].description);
+                                    const lng = parseFloat(tags['GPSLongitude'].description);
+                                    if(!isNaN(lat)) {
+                                        gpsData.value = { lat, lng };
+                                        updateMap(lat, lng);
+                                    }
+                                }
+                                analyzeRisk(tags);
+                            } catch (err) { console.error(err); }
+                        };
+
+                        const updateMap = (lat, lng) => {
+                            nextTick(() => {
+                                if (!map) {
+                                    map = L.map('map').setView([lat, lng], 13);
+                                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+                                } else {
+                                    map.setView([lat, lng], 13);
+                                }
+                                if(marker) map.removeLayer(marker);
+                                marker = L.marker([lat, lng]).addTo(map).bindPopup("📍 Found Here!").openPopup();
+                                map.invalidateSize();
+                            });
+                        };
+
+                        const analyzeRisk = async (tags) => {
+                            loading.value = true;
+                            const payload = {
+                                Make: tags['Make']?.description,
+                                Model: tags['Model']?.description,
+                                Software: tags['Software']?.description,
+                                GPSLatitude: tags['GPSLatitude'],
+                                DateTimeOriginal: tags['DateTimeOriginal']
+                            };
+                            try {
+                                const req = await fetch('/api/v1/meta-ghost/analyze', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({ metadata: payload })
+                                });
+                                const res = await req.json();
+                                if(res.success) analysisResult.value = res.data;
+                            } catch(e) { console.error(e); }
+                            finally { loading.value = false; }
+                        };
+
+                        const scrubMetadata = () => {
+                             if (!filePreview.value) return;
+                             const img = new Image();
+                             img.onload = () => {
+                                 const canvas = document.createElement('canvas');
+                                 canvas.width = img.width; canvas.height = img.height;
+                                 canvas.getContext('2d').drawImage(img, 0, 0);
+                                 const link = document.createElement('a');
+                                 link.download = `safe_ghost_${Date.now()}.jpg`;
+                                 link.href = canvas.toDataURL('image/jpeg', 0.95);
+                                 link.click();
+                             };
+                             img.src = filePreview.value;
+                        };
+
+                        const loadSample = async () => {
+                            try {
+                                const res = await fetch('https://raw.githubusercontent.com/ianare/exif-samples/master/jpg/gps/DSCN0010.jpg');
+                                const blob = await res.blob();
+                                const file = new File([blob], "sample.jpg", { type: "image/jpeg" });
+                                processFile({ target: { files: [file] } });
+                            } catch(e) { alert("Failed to load sample."); }
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return {
+                            currentTab, switchTab, t,
+                            fileInput, filePreview, displayMeta, hexDump, gpsData, analysisResult, loading,
+                            triggerUpload, processFile, scrubMetadata, loadSample
+                        };
+                    }
+                });
+
+                app.use(createVuetify({
+                    theme: { defaultTheme: document.documentElement.getAttribute('data-theme') || 'dark' }
+                })).mount('#vue-root');
+            }
+        };
+
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

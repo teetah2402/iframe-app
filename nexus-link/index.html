@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXUS BUILDER | Gummy V5.0</title>
+
+    <script>
+      // Persistence Check: No Reset on Reload
+      const getSavedTheme = () => localStorage.getItem('flowork_os_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', getSavedTheme());
+    </script>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F72585;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #FF006E;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+
+        html, body {
+            background-color: var(--bg-core); color: var(--text-main);
+            width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+            transition: background-color 0.4s ease; margin: 0;
+        }
+
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+
+        textarea, input {
+            color: #0080ff !important; background: rgba(0,0,0,0.03) !important;
+            border: 3px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+        }
+        .btn-game:active:not(:disabled) { border-bottom-width: 0px; transform: translateY(6px); }
+
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+
+        /* Preview Themes Logic */
+        [data-preview-theme="neon"] .preview-card { background: #000; border: 4px solid #0f0; color: #0f0; box-shadow: 0 0 20px #0f0; }
+        [data-preview-theme="luxury"] .preview-card { background: #1a1a1a; border: 4px solid #d4af37; color: #d4af37; }
+        [data-preview-theme="polar"] .preview-card { background: #f8fafc; border: 4px solid #e2e8f0; color: #0f172a; }
+        [data-preview-theme="brutal"] .preview-card { background: #ffff00; border: 8px solid #000; color: #000; border-radius: 0; transform: rotate(-1deg); }
+        [data-preview-theme="terminal"] .preview-card { background: #000; border: 2px solid #33ff33; color: #33ff33; font-family: monospace; }
+        [data-preview-theme="vapor"] .preview-card { background: linear-gradient(45deg, #ff71ce, #01cdfe); border: 4px solid #fff; color: #fff; text-shadow: 2px 2px #000; }
+    </style>
+</head>
+<body>
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        const i18n = {
+            id: {
+                pubTitle: "BIO TERBIT! 🎉", pubDesc: "Bio Link kamu sudah aktif di Flowork Cloud.", copy: "SALIN LINK", copied: "BERHASIL!", close: "TUTUP PANEL",
+                manifesto: "MANIFESTO 📜", backToEdit: "KEMBALI KE EDITOR",
+                heroTitle: "NEXUS INFO HUB", heroDesc: "Buat Bio Link lo di Flowork Cloud. Tanpa coding, tanpa ribet, kustomisasi total dengan Gummy Architecture.",
+                step1: "PROFIL & BIO 👤", step2: "TEMA VISUAL 🎨", step3: "MANAGER LINK 🔗",
+                handle: "Handle Kamu", dname: "Nama Tampilan", bio: "Bio Singkat", addLink: "TAMBAH +", publishBtn: "PUBLIKASIKAN SITE"
+            },
+            en: {
+                pubTitle: "BIO PUBLISHED! 🎉", pubDesc: "Your Bio Link is now active on Flowork Cloud.", copy: "COPY LINK", copied: "COPIED!", close: "CLOSE PANEL",
+                manifesto: "MANIFESTO 📜", backToEdit: "BACK TO EDITOR",
+                heroTitle: "NEXUS INFO HUB", heroDesc: "Create your Bio Link on Flowork Cloud. No coding, no hassle, total customization with Gummy Architecture.",
+                step1: "PROFILE & BIO 👤", step2: "VISUAL THEMES 🎨", step3: "LINK MANAGER 🔗",
+                handle: "Your Handle", dname: "Display Name", bio: "Short Bio", addLink: "ADD LINK +", publishBtn: "PUBLISH SITE"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+            async init() {
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([fetch('partials/lander.html?v='+cb), fetch('partials/app.html?v='+cb)]);
+                document.getElementById('vue-root').innerHTML = `
+                    <v-app style="background: transparent;">
+                        <v-main class="h-full relative overflow-hidden flex flex-col">
+                            <transition name="tab-fade"><div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto no-scrollbar absolute top-0 left-0">${await rLander.text()}</div></transition>
+                            <transition name="tab-fade"><div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col absolute top-0 left-0">${await rApp.text()}</div></transition>
+
+                            <v-dialog v-model="showModal" persistent max-width="450">
+                                <div class="gummy-board p-8 text-center animate-pop-in border-pop_green bg-panel">
+                                    <v-icon icon="mdi-check-decagram" color="pop_green" size="64" class="mb-4"></v-icon>
+                                    <h2 class="font-display font-black text-2xl text-main uppercase">{{ t.pubTitle }}</h2>
+                                    <p class="text-muted font-bold mt-2 leading-tight px-4">{{ t.pubDesc }}</p>
+                                    <div class="mt-8 gummy-board p-4 bg-black/5 flex items-center justify-between gap-4 border-2">
+                                        <span class="font-mono text-xs font-bold truncate text-main opacity-60">flowork.cloud/bio/{{ bioData.handle || 'user' }}</span>
+                                        <button @click="copyLink" class="bg-brand text-white text-[10px] font-black px-4 py-2 rounded-xl active:scale-95 transition-all shadow-md">
+                                            {{ isCopied ? t.copied : t.copy }}
+                                        </button>
+                                    </div>
+                                    <button @click="showModal = false" class="btn-game w-full mt-10 py-5 bg-panel border-4 border-border text-main text-sm font-black">{{ t.close }}</button>
+                                </div>
+                            </v-dialog>
+                        </v-main>
+                    </v-app>`;
+                this.initVue();
+            },
+
+            initVue() {
+                const { createApp, ref, computed, reactive, onMounted } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app'); // [RULE] Default App
+                        const showModal = ref(false);
+                        const isCopied = ref(false);
+                        const isDeploying = ref(false);
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'id');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        const bioData = reactive({
+                            handle: '', name: 'ALEXANDER', bio: 'Digital Artist & Creative Developer.', avatar: '',
+                            theme: 'glass', links: [{ title: 'PORTFOLIO', url: '#' }]
+                        });
+
+                        const themes = ['glass', 'neon', 'luxury', 'polar', 'brutal', 'terminal', 'vapor'];
+
+                        const addLink = () => bioData.links.push({ title: 'New Link', url: '#' });
+                        const removeLink = (i) => bioData.links.splice(i, 1);
+                        const handleImageUpload = (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (f) => bioData.avatar = f.target.result;
+                                reader.readAsDataURL(file);
+                            }
+                        };
+
+                        const deploy = async () => {
+                            if(!bioData.handle || bioData.handle.length < 3) { alert("Handle min 3 chars!"); return; }
+                            isDeploying.value = true;
+                            try {
+                                const payload = { handle: bioData.handle.toLowerCase().replace(/[^a-z0-9_]/g, ''), data: bioData };
+                                const res = await fetch('/api/v1/nexus-bio/publish', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(payload)
+                                });
+                                const json = await res.json();
+                                if(res.ok && json.success) showModal.value = true;
+                                else throw new Error(json.error || "Upload failed");
+                            } catch (e) { alert("Error: " + e.message); }
+                            finally { isDeploying.value = false; }
+                        };
+
+                        const copyLink = () => {
+                            navigator.clipboard.writeText(`https://flowork.cloud/bio/${bioData.handle}`);
+                            isCopied.value = true;
+                            setTimeout(() => isCopied.value = false, 2000);
+                        };
+
+                        onMounted(() => {
+                            window.addEventListener('message', (e) => {
+                                if (e.data?.type === 'THEME_CHANGE') {
+                                    document.documentElement.setAttribute('data-theme', e.data.theme);
+                                    localStorage.setItem('flowork_os_theme', e.data.theme);
+                                    theme.global.name.value = e.data.theme;
+                                }
+                                if (e.data?.type === 'LANG_CHANGE') {
+                                    localStorage.setItem('flowork_lang', e.data.lang);
+                                    currentLang.value = e.data.lang;
+                                }
+                            });
+                        });
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return { currentTab, t, bioData, themes, showModal, isCopied, isDeploying, addLink, removeLink, handleImageUpload, deploy, copyLink };
+                    }
+                });
+                app.use(createVuetify()).mount('#vue-root');
+            }
+        };
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

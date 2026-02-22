@@ -1,0 +1,131 @@
+<div class="flex flex-col h-full w-full font-sans relative overflow-hidden bg-core">
+
+    <div class="flex flex-col md:flex-row justify-between items-center p-4 border-b-4 border-[var(--border-color)] bg-panel z-20 shrink-0 gap-3 gummy-board rounded-none rounded-b-[2rem] shadow-sm relative">
+        <div class="flex w-full md:w-auto justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-pop_blue rounded-full flex items-center justify-center border-4 border-[var(--border-color)] shadow-sm">
+                    <v-icon icon="mdi-blender" color="white" size="28" class="animate-pulse"></v-icon>
+                </div>
+                <div>
+                    <h1 class="font-display text-xl font-black text-main m-0 leading-none tracking-wide uppercase">
+                        {{ t.app_title }}
+                    </h1>
+                </div>
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="md:hidden text-xs text-brand font-black flex items-center gap-1 bg-core px-4 py-2 rounded-full border-4 border-[var(--border-color)] shadow-sm">
+                {{ t.btn_info }} <v-icon size="small">mdi-arrow-right</v-icon>
+            </button>
+        </div>
+
+        <div class="flex w-full md:w-auto gap-2 items-center justify-between md:justify-end">
+            <div class="flex bg-core border-4 border-[var(--border-color)] p-1 rounded-full shadow-inner w-full md:w-auto">
+                <button @click="mode = 'mixer'" :class="mode === 'mixer' ? 'bg-panel text-brand shadow-sm border-2 border-[var(--border-color)]' : 'text-muted border-2 border-transparent'" class="flex-1 md:flex-none px-4 py-2 text-xs font-black font-display rounded-full transition-all uppercase flex items-center justify-center gap-1">
+                    <v-icon size="small">mdi-layers-triple</v-icon> {{ t.tab_mixer }}
+                </button>
+                <button @click="mode = 'density'" :class="mode === 'density' ? 'bg-panel text-brand shadow-sm border-2 border-[var(--border-color)]' : 'text-muted border-2 border-transparent'" class="flex-1 md:flex-none px-4 py-2 text-xs font-black font-display rounded-full transition-all uppercase flex items-center justify-center gap-1">
+                    <v-icon size="small">mdi-chart-bar</v-icon> {{ t.tab_density }}
+                </button>
+            </div>
+
+            <button onclick="window.switchAppTab('lander')" class="hidden md:flex text-xs text-main font-black items-center gap-1 bg-core px-5 py-2 rounded-full border-4 border-[var(--border-color)] hover:bg-pop_blue hover:text-white transition shadow-sm">
+                <v-icon size="small">mdi-arrow-left</v-icon> {{ t.btn_info }}
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col overflow-y-auto md:overflow-hidden min-h-0 p-4 md:p-6 pb-40 md:pb-6 z-10">
+
+        <div v-if="mode === 'mixer'" class="flex-1 flex flex-col lg:flex-row gap-4 h-full min-h-0">
+            <div class="w-full lg:flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 h-auto lg:h-full shrink-0 lg:shrink">
+
+                <div class="flex flex-col min-h-[250px] md:h-full gummy-board border-4 border-pop_blue overflow-hidden relative group">
+                    <div class="bg-pop_blue text-white text-xs font-black font-display p-3 text-center uppercase tracking-widest border-b-4 border-pop_blue">{{ t.col_a }}</div>
+                    <textarea v-model="colA" class="flex-1 bg-pop_blue/5 border-none rounded-none p-4 text-main text-sm font-bold resize-none focus:outline-none focus:bg-pop_blue/10 transition-all"></textarea>
+                    <div class="text-[10px] text-white text-center py-2 bg-pop_blue font-black uppercase">{{ countLines(colA) }} {{ t.lines }}</div>
+                </div>
+
+                <div class="flex flex-col min-h-[250px] md:h-full gummy-board border-4 border-pop_pink overflow-hidden relative group">
+                    <div class="bg-pop_pink text-white text-xs font-black font-display p-3 text-center uppercase tracking-widest border-b-4 border-pop_pink">{{ t.col_b }}</div>
+                    <textarea v-model="colB" class="flex-1 bg-pop_pink/5 border-none rounded-none p-4 text-main text-sm font-bold resize-none focus:outline-none focus:bg-pop_pink/10 transition-all"></textarea>
+                    <div class="text-[10px] text-white text-center py-2 bg-pop_pink font-black uppercase">{{ countLines(colB) }} {{ t.lines }}</div>
+                </div>
+
+                <div class="flex flex-col min-h-[250px] md:h-full gummy-board border-4 border-pop_green overflow-hidden relative group">
+                    <div class="bg-pop_green text-white text-xs font-black font-display p-3 text-center uppercase tracking-widest border-b-4 border-pop_green">{{ t.col_c }}</div>
+                    <textarea v-model="colC" class="flex-1 bg-pop_green/5 border-none rounded-none p-4 text-main text-sm font-bold resize-none focus:outline-none focus:bg-pop_green/10 transition-all"></textarea>
+                    <div class="text-[10px] text-white text-center py-2 bg-pop_green font-black uppercase">{{ countLines(colC) }} {{ t.lines }}</div>
+                </div>
+
+            </div>
+
+            <div id="output-area" class="w-full lg:w-[400px] xl:w-[450px] flex flex-col gap-4 h-auto lg:h-full shrink-0">
+                <div class="gummy-board p-5 flex flex-col gap-4 shadow-sm bg-core">
+                    <div class="flex gap-2 bg-panel p-1 border-4 border-[var(--border-color)] rounded-[1.5rem]">
+                        <button @click="matchTypes.broad = !matchTypes.broad" :class="matchTypes.broad ? 'bg-pop_blue text-white shadow-inner border-pop_blue' : 'text-muted border-transparent'" class="flex-1 border-2 py-2 text-[10px] font-black rounded-full transition uppercase tracking-tighter">Broad</button>
+                        <button @click="matchTypes.phrase = !matchTypes.phrase" :class="matchTypes.phrase ? 'bg-pop_pink text-white shadow-inner border-pop_pink' : 'text-muted border-transparent'" class="flex-1 border-2 py-2 text-[10px] font-black rounded-full transition uppercase tracking-tighter">"Phrase"</button>
+                        <button @click="matchTypes.exact = !matchTypes.exact" :class="matchTypes.exact ? 'bg-pop_green text-white shadow-inner border-pop_green' : 'text-muted border-transparent'" class="flex-1 border-2 py-2 text-[10px] font-black rounded-full transition uppercase tracking-tighter">[Exact]</button>
+                    </div>
+
+                    <button @click="processMixer" :disabled="loading" class="btn-game w-full bg-brand hover:brightness-110 text-white py-4 rounded-[1.5rem] font-display font-black text-sm uppercase flex justify-center items-center gap-2 transition">
+                        <span v-if="!loading"><v-icon icon="mdi-blender" size="small"></v-icon> {{ t.btn_generate }}</span>
+                        <v-icon v-else icon="mdi-loading" class="animate-spin"></v-icon>
+                    </button>
+
+                    <button @click="clearAll" class="text-[10px] text-pop_pink hover:text-red-600 font-black uppercase tracking-widest flex items-center justify-center gap-1">
+                        <v-icon icon="mdi-trash-can-outline" size="small"></v-icon> {{ t.btn_clear }}
+                    </button>
+                </div>
+
+                <div class="flex-1 min-h-[350px] flex flex-col gummy-board overflow-hidden border-4 bg-panel">
+                    <div class="flex justify-between items-center p-4 border-b-4 border-[var(--border-color)] bg-core flex-none">
+                        <div class="text-[10px] text-muted font-black font-display uppercase tracking-widest">{{ t.output_combos }}: <span class="text-brand text-sm">{{ resultCount }}</span></div>
+                        <button @click="copyResult" class="text-[10px] text-white bg-pop_yellow border-2 border-[var(--border-color)] hover:brightness-110 flex items-center gap-1 font-black px-4 py-2 rounded-full uppercase transition shadow-sm">
+                            <v-icon size="x-small">mdi-content-copy</v-icon> {{ t.btn_copy }}
+                        </button>
+                    </div>
+                    <textarea readonly class="flex-1 bg-[rgba(0,0,0,0.02)] text-main p-5 font-bold text-sm resize-none outline-none border-none rounded-none whitespace-pre" :value="generatedResult" :placeholder="t.placeholder_output"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="flex-1 flex flex-col lg:flex-row gap-4 h-full min-h-0">
+            <div class="flex-1 flex flex-col gap-3 min-h-[350px] lg:h-full">
+                <label class="text-xs text-brand font-black font-display uppercase tracking-widest ml-2 flex items-center gap-1">
+                    <v-icon icon="mdi-text-box-outline" size="small"></v-icon> {{ t.target_content }}
+                </label>
+                <textarea v-model="densityText" class="flex-1 gummy-board bg-core p-6 text-sm text-main font-bold focus:border-brand transition-colors resize-none shadow-inner" :placeholder="t.target_content_ph"></textarea>
+            </div>
+
+            <div id="density-result" class="w-full lg:w-[400px] flex flex-col gap-4 h-auto lg:h-full shrink-0">
+                <div class="flex-none flex flex-col gap-3">
+                    <label class="text-xs text-pop_pink font-black font-display uppercase tracking-widest ml-2 flex items-center gap-1">
+                        <v-icon icon="mdi-key-variant" size="small"></v-icon> {{ t.target_keyword }}
+                    </label>
+                    <textarea v-model="densityKeywords" class="h-32 gummy-board bg-core p-4 text-sm text-main font-bold resize-none focus:border-pop_pink shadow-inner" :placeholder="t.target_keyword_ph"></textarea>
+                </div>
+
+                <button @click="processDensity" :disabled="loading" class="btn-game flex-none w-full bg-pop_pink hover:brightness-110 text-white py-4 rounded-[1.5rem] font-display font-black text-sm tracking-widest uppercase transition">
+                    <span v-if="!loading">{{ t.btn_analyze }}</span>
+                    <v-icon v-else icon="mdi-loading" class="animate-spin"></v-icon>
+                </button>
+
+                <div class="flex-1 flex flex-col gummy-board p-5 overflow-hidden min-h-[350px] bg-panel">
+                    <div class="text-xs text-main font-black font-display mb-4 border-b-4 border-[var(--border-color)] pb-3 uppercase flex items-center gap-2">
+                        <v-icon icon="mdi-chart-donut" color="var(--brand-color)"></v-icon> {{ t.analysis_result }}
+                    </div>
+                    <div class="overflow-y-auto flex-1 pr-2 space-y-3">
+                        <div v-if="densityAnalysis.length === 0" class="text-center text-muted text-sm mt-10 font-bold uppercase">{{ t.no_data }}</div>
+                        <div v-for="item in densityAnalysis" :key="item.word" class="flex justify-between items-center text-sm p-4 rounded-[1rem] bg-core border-2 border-[var(--border-color)] transition hover:-translate-y-1 shadow-sm">
+                            <span class="text-main truncate w-40 font-black uppercase" :title="item.word">{{ item.word }}</span>
+                            <div class="flex gap-2 items-center">
+                                <span class="text-brand font-black text-xs bg-panel border-2 border-[var(--border-color)] px-2 py-1 rounded-md">{{ item.count }}x</span>
+                                <span class="font-black text-xs w-16 text-center px-2 py-1 rounded-md bg-panel border-2 border-[var(--border-color)]" :class="getDensityColor(item.percent)">{{ item.percent }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,78 @@
+<div class="flex flex-col h-full w-full font-sans relative overflow-hidden bg-core">
+
+    <div class="flex flex-col md:flex-row justify-between items-center p-4 border-b-4 border-[var(--border-color)] bg-panel z-20 shrink-0 gap-3 gummy-board rounded-none rounded-b-[2rem] shadow-sm relative">
+        <div class="flex w-full md:w-auto justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-core rounded-full flex items-center justify-center border-4 border-[var(--border-color)] shadow-sm">
+                    <v-icon icon="mdi-shield-check" color="var(--brand-color)" size="28"></v-icon>
+                </div>
+                <div>
+                    <h1 class="font-display text-xl font-black text-main m-0 leading-none tracking-wide uppercase">
+                        {{ t.app_title }}
+                    </h1>
+                </div>
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="md:hidden text-xs text-brand font-black flex items-center gap-1 bg-core px-4 py-2 rounded-full border-4 border-[var(--border-color)] shadow-sm">
+                {{ t.btn_info }} <v-icon size="small">mdi-arrow-right</v-icon>
+            </button>
+        </div>
+
+        <div class="flex w-full md:w-auto gap-4 items-center justify-between md:justify-end">
+            <div class="flex gap-2">
+                <div class="bg-pop_pink/10 border-2 border-pop_pink px-3 py-1 rounded-xl text-center min-w-[70px]">
+                    <span class="text-[9px] text-pop_pink font-black block uppercase">{{ t.stat_removed }}</span>
+                    <span class="text-sm font-black text-pop_pink">{{ countRemoved }}</span>
+                </div>
+                <div class="bg-brand/10 border-2 border-brand px-3 py-1 rounded-xl text-center min-w-[70px]">
+                    <span class="text-[9px] text-brand font-black block uppercase">{{ t.stat_kept }}</span>
+                    <span class="text-sm font-black text-brand">{{ countKept }}</span>
+                </div>
+            </div>
+
+            <button onclick="window.switchAppTab('lander')" class="hidden md:flex text-xs text-main font-black items-center gap-1 bg-core px-5 py-2 rounded-full border-4 border-[var(--border-color)] hover:bg-brand hover:text-white transition shadow-sm">
+                <v-icon size="small">mdi-arrow-left</v-icon> {{ t.btn_info }}
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0 p-4 md:p-6 pb-40 md:pb-6 z-10 gap-4">
+
+        <div class="flex-1 flex flex-col gummy-board border-4 border-[var(--border-color)] overflow-hidden relative min-h-[350px]">
+            <div class="bg-panel border-b-4 border-[var(--border-color)] p-3 flex justify-between items-center z-10">
+                <span class="text-[10px] font-black font-display text-pop_pink uppercase bg-pop_pink/10 px-3 py-1 rounded-full border-2 border-pop_pink">
+                    <v-icon icon="mdi-bug" size="x-small"></v-icon> {{ t.label_input }}
+                </span>
+                <div class="flex gap-2">
+                    <button @click="clearAll" class="text-[10px] text-muted hover:text-pop_pink flex items-center gap-1 font-black px-3 py-1 bg-core rounded-full border-2 border-[var(--border-color)] transition">
+                        <v-icon icon="mdi-trash-can-outline" size="small"></v-icon>
+                    </button>
+                    <button @click="pasteInput" class="text-[10px] text-brand hover:brightness-110 flex items-center gap-1 font-black px-4 py-1 bg-core rounded-full border-2 border-[var(--border-color)] transition">
+                        <v-icon icon="mdi-clipboard" size="small"></v-icon> {{ t.btn_paste }}
+                    </button>
+                </div>
+            </div>
+
+            <textarea v-model="inputText" class="flex-1 bg-core border-none rounded-none p-6 text-main text-sm font-bold resize-none focus:outline-none custom-scroll" :placeholder="t.ph_input"></textarea>
+        </div>
+
+        <div class="hidden md:flex flex-col justify-center items-center z-20 -mx-6">
+            <div class="w-16 h-16 bg-brand rounded-full border-4 border-[var(--border-color)] flex items-center justify-center shadow-md animate-pulse">
+                <v-icon icon="mdi-arrow-right-thick" size="x-large" color="white"></v-icon>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col gummy-board border-4 border-brand overflow-hidden relative min-h-[350px] bg-brand/5">
+            <div class="bg-panel border-b-4 border-brand p-3 flex justify-between items-center z-10">
+                <span class="text-[10px] font-black font-display text-brand uppercase bg-brand/10 px-3 py-1 rounded-full border-2 border-brand">
+                    <v-icon icon="mdi-shield-check" size="x-small"></v-icon> {{ t.label_output }}
+                </span>
+                <button @click="copyOutput" class="btn-game text-[10px] text-white bg-brand hover:brightness-110 flex items-center gap-1 font-black px-4 py-2 rounded-full border-2 border-brand transition shadow-sm">
+                    <v-icon icon="mdi-content-copy" size="small"></v-icon> {{ t.btn_copy }}
+                </button>
+            </div>
+
+            <textarea readonly :value="outputText" class="flex-1 bg-transparent border-none rounded-none p-6 text-main text-sm font-bold resize-none outline-none custom-scroll" :placeholder="t.ph_output"></textarea>
+        </div>
+
+    </div>
+</div>

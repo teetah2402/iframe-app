@@ -1,0 +1,190 @@
+<div class="flex flex-col h-full w-full font-sans relative overflow-hidden bg-core">
+
+    <div class="absolute inset-0 pointer-events-none opacity-[0.03]" style="background-image: radial-gradient(var(--text-main) 2px, transparent 2px); background-size: 24px 24px;"></div>
+
+    <div class="flex flex-col md:flex-row justify-between items-center p-4 border-b-[6px] border-[var(--border-color)] bg-panel z-20 shrink-0 gap-3 rounded-none rounded-b-[2.5rem] shadow-[0_10px_0_0_rgba(0,0,0,0.05)] relative mb-2 mx-2">
+        <div class="flex w-full md:w-auto justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 bg-pop_pink rounded-full flex items-center justify-center border-[4px] border-[var(--border-color)] shadow-sm transform -rotate-12">
+                    <v-icon icon="mdi-scissors-cutting" color="white" size="28"></v-icon>
+                </div>
+                <div>
+                    <h1 class="font-display text-2xl font-black text-main m-0 leading-none tracking-wide uppercase">
+                        {{ t.app_title }}
+                    </h1>
+                </div>
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="md:hidden text-xs text-brand font-black flex items-center gap-1 bg-core px-4 py-2 rounded-full border-[4px] border-[var(--border-color)] shadow-sm">
+                {{ t.btn_info }} <v-icon size="small">mdi-arrow-right</v-icon>
+            </button>
+        </div>
+
+        <div class="flex w-full md:w-auto gap-4 items-center justify-between md:justify-end">
+            <div class="bg-pop_yellow border-[4px] border-[var(--border-color)] px-6 py-3 rounded-full text-sm font-black text-main uppercase shadow-[0_4px_0_0_var(--border-color)] flex items-center gap-2 transform rotate-2">
+                <v-icon icon="mdi-candy" size="small" class="text-pop_pink"></v-icon> {{ t.btn_app }}
+            </div>
+            <button onclick="window.switchAppTab('lander')" class="hidden md:flex text-sm text-main font-black items-center gap-2 bg-core px-6 py-3 rounded-full border-[4px] border-[var(--border-color)] hover:bg-pop_blue hover:text-white transition shadow-[0_4px_0_0_var(--border-color)] active:translate-y-1 active:shadow-none">
+                <v-icon size="small">mdi-arrow-left</v-icon> {{ t.btn_info }}
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0 p-4 md:p-6 pb-40 md:pb-6 z-10 gap-6">
+
+        <div class="flex-1 flex flex-col bg-panel rounded-[2.5rem] overflow-hidden border-[6px] border-[var(--border-color)] min-h-[400px] shadow-[0_15px_0_0_rgba(0,0,0,0.1)]">
+
+            <div class="flex flex-col sm:flex-row justify-between items-center p-4 border-b-[6px] border-[var(--border-color)] bg-core gap-4 z-10 shrink-0">
+                <div class="text-sm font-black font-display text-pop_blue uppercase flex items-center gap-2 bg-pop_blue/10 px-4 py-2 rounded-full border-[3px] border-pop_blue">
+                    <v-icon icon="mdi-television-classic" size="small"></v-icon> {{ t.studio_monitor }}
+                </div>
+                <div class="flex gap-3 w-full sm:w-auto">
+                    <div class="flex bg-panel border-[4px] border-[var(--border-color)] rounded-full overflow-hidden shrink-0 shadow-inner">
+                        <button class="px-4 py-2 text-[10px] font-black uppercase hover:bg-pop_pink hover:text-white transition focus:bg-pop_pink focus:text-white" onclick="setMode('original')">{{ t.btn_orig }}</button>
+                        <button class="px-4 py-2 text-[10px] font-black uppercase border-l-[4px] border-[var(--border-color)] hover:bg-pop_pink hover:text-white transition focus:bg-pop_pink focus:text-white" onclick="setMode('tiktok')">{{ t.btn_tiktok }}</button>
+                    </div>
+                    <select id="resSelect" class="bg-pop_yellow border-[4px] border-[var(--border-color)] rounded-full px-4 py-2 text-[10px] font-black font-display outline-none cursor-pointer shadow-[0_4px_0_0_var(--border-color)] active:translate-y-1 active:shadow-none transition">
+                        <option value="original">{{ t.opt_as_source }}</option>
+                        <option value="720">HD 720p</option>
+                        <option value="1080" selected>FHD 1080p</option>
+                        <option value="1440">2K QHD</option>
+                        <option value="2160">4K UHD</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="video-workspace flex-1 relative bg-[#0f111a] flex items-center justify-center overflow-hidden border-b-[6px] border-[var(--border-color)]">
+
+                <div id="uploadPlaceholder" class="upload-overlay absolute inset-0 z-50 flex items-center justify-center bg-core/80 backdrop-blur-md cursor-pointer group transition-all">
+                    <input type="file" id="videoInput" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full">
+                    <div class="text-center group-hover:scale-110 transition-transform duration-300">
+                        <div class="w-24 h-24 bg-pop_blue rounded-[2rem] flex items-center justify-center border-[6px] border-white shadow-[0_10px_0_0_rgba(0,180,216,0.3)] mx-auto mb-4 transform rotate-6 group-hover:rotate-0 transition-transform">
+                            <v-icon icon="mdi-cloud-upload" size="48" color="white" class="animate-bounce"></v-icon>
+                        </div>
+                        <h3 class="text-pop_blue font-black font-display text-xl uppercase tracking-widest bg-white px-6 py-2 rounded-full border-[4px] border-pop_blue shadow-sm">{{ t.tap_upload }}</h3>
+                    </div>
+                </div>
+
+                <div id="videoStage" class="video-stage hidden w-full h-full relative flex justify-center items-center">
+                    <video id="videoPreview" class="max-w-full max-h-full block rounded-xl border-4 border-black" playsinline controls></video>
+
+                    <div id="overlayMirror" class="overlay-mirror absolute pointer-events-none z-10 w-full h-full inset-0">
+
+                        <div id="cropBox" class="crop-box hidden absolute pointer-events-auto box-border border-[4px] border-dashed border-pop_blue bg-pop_blue/20 z-10 rounded-2xl shadow-[0_0_15px_rgba(0,180,216,0.5)]" style="width: 100px; height: 177px;">
+                            <div class="drag-area absolute inset-0 cursor-move z-10" data-target="crop"></div>
+
+                            <div class="handle nw absolute w-6 h-6 bg-white border-[4px] border-pop_blue rounded-full z-30 shadow-md -top-3 -left-3 cursor-nw-resize" data-target="crop" data-dir="nw"></div>
+                            <div class="handle ne absolute w-6 h-6 bg-white border-[4px] border-pop_blue rounded-full z-30 shadow-md -top-3 -right-3 cursor-ne-resize" data-target="crop" data-dir="ne"></div>
+                            <div class="handle sw absolute w-6 h-6 bg-white border-[4px] border-pop_blue rounded-full z-30 shadow-md -bottom-3 -left-3 cursor-sw-resize" data-target="crop" data-dir="sw"></div>
+                            <div class="handle se absolute w-6 h-6 bg-white border-[4px] border-pop_blue rounded-full z-30 shadow-md -bottom-3 -right-3 cursor-se-resize" data-target="crop" data-dir="se"></div>
+
+                            <span class="crop-label absolute -top-8 left-1/2 -translate-x-1/2 bg-pop_blue text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-sm">CROP</span>
+                        </div>
+
+                        <div id="captionBox" class="caption-box absolute pointer-events-auto box-border border-[4px] border-dashed border-pop_yellow bg-black/60 z-20 flex items-center justify-center rounded-2xl shadow-[0_0_15px_rgba(255,209,102,0.5)]" style="width: 300px; height: 80px; top: 10%; left: 10%;">
+                            <div class="drag-area absolute inset-0 cursor-move z-10" data-target="caption"></div>
+
+                            <div class="handle-cap nw absolute w-6 h-6 bg-white border-[4px] border-pop_yellow rounded-full z-30 shadow-md -top-3 -left-3 cursor-nw-resize" data-target="caption" data-dir="nw"></div>
+                            <div class="handle-cap ne absolute w-6 h-6 bg-white border-[4px] border-pop_yellow rounded-full z-30 shadow-md -top-3 -right-3 cursor-ne-resize" data-target="caption" data-dir="ne"></div>
+                            <div class="handle-cap sw absolute w-6 h-6 bg-white border-[4px] border-pop_yellow rounded-full z-30 shadow-md -bottom-3 -left-3 cursor-sw-resize" data-target="caption" data-dir="sw"></div>
+                            <div class="handle-cap se absolute w-6 h-6 bg-white border-[4px] border-pop_yellow rounded-full z-30 shadow-md -bottom-3 -right-3 cursor-se-resize" data-target="caption" data-dir="se"></div>
+
+                            <div class="caption-content relative w-full h-full flex items-center justify-center pointer-events-none z-[5]">
+                                <div id="liveCaptionText" class="text-white font-black text-center whitespace-pre-wrap break-words leading-tight w-full p-2 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-xl">PREVIEW</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-controls p-4 bg-core flex flex-col sm:flex-row justify-between items-center shrink-0 gap-3">
+                <div class="text-xs font-black text-muted flex items-center gap-2 uppercase bg-panel px-4 py-2 border-[4px] border-[var(--border-color)] rounded-full">
+                    <v-icon icon="mdi-file-video" size="small" class="text-pop_blue"></v-icon> <span id="fileInfo">{{ t.no_media }}</span>
+                </div>
+                <button id="smartCopyBtn" class="bg-pop_green text-main px-6 py-3 rounded-full font-black text-xs uppercase border-[4px] border-[var(--border-color)] shadow-[0_5px_0_0_var(--border-color)] active:translate-y-1 active:shadow-none transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    {{ t.btn_set_start }}
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full md:w-80 lg:w-96 flex flex-col shrink-0 h-auto md:h-full gap-6">
+
+            <div class="bg-panel border-[6px] border-[var(--border-color)] rounded-[2.5rem] flex flex-col h-full min-h-[400px] overflow-hidden shadow-[0_15px_0_0_rgba(0,0,0,0.1)]">
+
+                <div class="flex bg-core border-b-[6px] border-[var(--border-color)] p-3 gap-2 shrink-0">
+                    <button @click="editorTab = 'manual'" :class="editorTab === 'manual' ? 'bg-pop_blue text-white shadow-inner border-pop_blue' : 'bg-panel border-[var(--border-color)] text-muted hover:bg-black/5'" class="flex-1 py-3 text-[10px] font-black font-display border-[4px] rounded-2xl transition uppercase">{{ t.tab_manual }}</button>
+                    <button @click="editorTab = 'magic'" :class="editorTab === 'magic' ? 'bg-pop_pink text-white shadow-inner border-pop_pink' : 'bg-panel border-[var(--border-color)] text-muted hover:bg-black/5'" class="flex-1 py-3 text-[10px] font-black font-display border-[4px] rounded-2xl transition uppercase">{{ t.tab_magic }}</button>
+                    <button @click="editorTab = 'style'" :class="editorTab === 'style' ? 'bg-pop_yellow text-main shadow-inner border-pop_yellow' : 'bg-panel border-[var(--border-color)] text-muted hover:bg-black/5'" class="flex-1 py-3 text-[10px] font-black font-display border-[4px] rounded-2xl transition uppercase">{{ t.tab_style }}</button>
+                </div>
+
+                <div class="flex-1 p-5 overflow-y-auto bg-core">
+
+                    <div v-show="editorTab === 'manual'" class="flex flex-col h-full gap-3">
+                        <div class="text-xs font-black text-pop_blue uppercase bg-pop_blue/10 p-3 rounded-xl border-[3px] border-pop_blue text-center">{{ t.lbl_format }}</div>
+                        <textarea id="timeInput" class="flex-1 w-full bg-panel border-[4px] border-[var(--border-color)] rounded-[1.5rem] p-4 text-sm font-mono text-main resize-none focus:border-pop_blue shadow-inner" placeholder="00:00:00-00:00:05|Halo Guys!&#10;00:00:05-00:00:10|Welcome Back" spellcheck="false"></textarea>
+                    </div>
+
+                    <div v-show="editorTab === 'magic'" class="flex flex-col gap-5">
+                        <div class="bg-panel p-5 border-[4px] border-[var(--border-color)] rounded-[1.5rem] flex flex-col gap-3 shadow-sm">
+                            <label class="text-xs font-black text-pop_pink uppercase">{{ t.lbl_duration }}</label>
+                            <div class="flex gap-3">
+                                <input type="number" id="splitDuration" value="30" class="flex-1 bg-core border-[4px] border-[var(--border-color)] p-3 text-center font-black rounded-xl text-lg shadow-inner">
+                                <button class="bg-pop_pink text-white px-6 font-black rounded-xl text-sm border-[4px] border-[var(--border-color)] shadow-[0_4px_0_0_var(--border-color)] active:translate-y-1 active:shadow-none transition" onclick="generateByDuration()">{{ t.btn_gen }}</button>
+                            </div>
+                        </div>
+                        <div class="bg-panel p-5 border-[4px] border-[var(--border-color)] rounded-[1.5rem] flex flex-col gap-3 shadow-sm">
+                            <label class="text-xs font-black text-pop_pink uppercase">{{ t.lbl_count }}</label>
+                            <div class="flex gap-3">
+                                <input type="number" id="splitCount" value="5" class="flex-1 bg-core border-[4px] border-[var(--border-color)] p-3 text-center font-black rounded-xl text-lg shadow-inner">
+                                <button class="bg-pop_pink text-white px-6 font-black rounded-xl text-sm border-[4px] border-[var(--border-color)] shadow-[0_4px_0_0_var(--border-color)] active:translate-y-1 active:shadow-none transition" onclick="generateByCount()">{{ t.btn_gen }}</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="editorTab === 'style'" class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-2 bg-panel p-4 border-[4px] border-[var(--border-color)] rounded-[1.5rem]">
+                            <label class="text-xs font-black text-pop_yellow uppercase">{{ t.lbl_font }}</label>
+                            <select id="fontSelect" class="bg-core border-[4px] border-[var(--border-color)] p-3 rounded-xl text-sm font-black cursor-pointer shadow-inner" onchange="loadSelectedFont()"></select>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="flex-1 flex flex-col gap-2 bg-panel p-4 border-[4px] border-[var(--border-color)] rounded-[1.5rem]">
+                                <label class="text-[10px] font-black text-pop_yellow uppercase text-center">{{ t.lbl_text_col }}</label>
+                                <input type="color" id="textColor" value="#ffffff" class="w-full h-12 rounded-xl cursor-pointer" oninput="updateStyle()">
+                            </div>
+                            <div class="flex-1 flex flex-col gap-2 bg-panel p-4 border-[4px] border-[var(--border-color)] rounded-[1.5rem]">
+                                <label class="text-[10px] font-black text-pop_yellow uppercase text-center">{{ t.lbl_bg_col }}</label>
+                                <input type="color" id="bgColor" value="#000000" class="w-full h-12 rounded-xl cursor-pointer" oninput="updateStyle()">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 bg-panel p-4 border-[4px] border-[var(--border-color)] rounded-[1.5rem]">
+                            <label class="text-xs font-black text-pop_yellow uppercase">{{ t.lbl_bg_op }}</label>
+                            <input type="range" id="bgOpacity" min="0" max="1" step="0.1" value="0.7" class="accent-pop_yellow" oninput="updateStyle()">
+                        </div>
+                        <div class="flex flex-col gap-2 bg-panel p-4 border-[4px] border-[var(--border-color)] rounded-[1.5rem]">
+                            <label class="text-xs font-black text-pop_yellow uppercase">{{ t.lbl_size }}</label>
+                            <input type="range" id="fontSize" min="10" max="100" value="30" class="accent-pop_yellow" oninput="updateStyle()">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="border-t-[6px] border-[var(--border-color)] bg-panel shrink-0 p-4 flex flex-col gap-4">
+                    <div id="terminalLog" class="h-20 overflow-y-auto bg-core border-[4px] border-[var(--border-color)] rounded-2xl p-3 text-[10px] font-mono font-bold text-muted shadow-inner">
+                        <div>{{ t.log_ready }}</div>
+                    </div>
+                    <button id="processBtn" class="w-full bg-brand text-white py-4 rounded-full font-black font-display text-sm uppercase flex items-center justify-center gap-2 border-[4px] border-[var(--border-color)] shadow-[0_6px_0_0_var(--border-color)] active:translate-y-2 active:shadow-none transition-all">
+                        <v-icon icon="mdi-content-save-all" size="large"></v-icon> {{ t.btn_process }}
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <style>
+        .hidden { display: none !important; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 4px solid var(--border-color); border-radius: 0.5rem; }
+    </style>
+</div>

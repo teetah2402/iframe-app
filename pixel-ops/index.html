@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pixel Ops | Diet Foto Anti-Gembul!</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Persistence Logic: Get Theme Before Render
+      const getSavedTheme = () => localStorage.getItem('flowork_os_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', getSavedTheme());
+
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F72585;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #FF006E;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* HIDE SCROLLBAR GLOBAL */
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+
+        html, body {
+            background-color: var(--bg-core); color: var(--text-main);
+            width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+            transition: background-color 0.4s ease; margin: 0; padding: 0;
+            user-select: none;
+        }
+
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+
+        /* Input Look "Diukir" */
+        textarea, input:not([type="range"]) {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.05) !important;
+            border: 3px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 800 !important;
+        }
+
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.25); border-radius: 1.8rem;
+            font-weight: 800; transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+        }
+        .btn-game:active:not(:disabled) { border-bottom-width: 0px; transform: translateY(6px); }
+        .btn-game:disabled { opacity: 0.5; cursor: not-allowed; border-bottom-width: 2px; }
+
+        .tab-fade-enter-active { transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.95) translateY(30px); }
+    </style>
+</head>
+<body>
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        const i18n = {
+            id: {
+                heroTitle: "Diet Digital,", heroSub: "Kurusin Foto!",
+                heroDesc: "Capek web lambat gara-gara foto kegedean? Pixel Ops bakal bikin foto lo langsing tanpa kurang gizi.",
+                startBtn: "Mulai Diet Foto! 🧬",
+                appTitle: "Pixel Ops",
+                step1: "1. DROP FOTO 📸", step2: "2. SET TARGET 🎯", step3: "3. HASIL DIET ✨",
+                processBtn: "GASKAN KOMPRES!", loading: "LAGI DIPERAS...",
+                zipBtn: "DOWNLOAD ZIP 📦", aggressive: "SADIS", fidelity: "CANTIK",
+                dropZone: "TARUH FOTO DI SINI", saved: "HEMAT", ready: "SIAP", queue: "ANTRE", back: "KEMBALI"
+            },
+            en: {
+                heroTitle: "Digital Diet,", heroSub: "Slim Your Pixels!",
+                heroDesc: "Tired of slow websites due to heavy images? Pixel Ops makes your photos slim without losing quality.",
+                startBtn: "Start Slimming! 🧬",
+                appTitle: "Pixel Ops",
+                step1: "1. DROP ASSETS 📸", step2: "2. SET TARGET 🎯", step3: "3. RESULTS ✨",
+                processBtn: "START COMPRESS!", loading: "SQUEEZING...",
+                zipBtn: "DOWNLOAD ZIP 📦", aggressive: "SMALLER", fidelity: "SHARPER",
+                dropZone: "DROP IMAGES HERE", saved: "SAVED", ready: "READY", queue: "QUEUE", back: "BACK"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+            async init() {
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([
+                    fetch('partials/lander.html?v=' + cb),
+                    fetch('partials/app.html?v=' + cb)
+                ]);
+
+                document.getElementById('vue-root').innerHTML = `
+                    <v-app style="background: transparent;">
+                        <v-main class="h-full relative overflow-hidden flex flex-col">
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">
+                                    ${await rLander.text()}
+                                </div>
+                            </transition>
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col absolute top-0 left-0">
+                                    ${await rApp.text()}
+                                </div>
+                            </transition>
+                        </v-main>
+                    </v-app>`;
+
+                this.initVue();
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        const newTheme = e.data.theme;
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('flowork_os_theme', newTheme);
+                        if (this.vueInstance) this.vueInstance.theme.global.name.value = newTheme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        const newLang = e.data.lang;
+                        localStorage.setItem('flowork_lang', newLang);
+                        this.vueInstance.currentLang.value = newLang;
+                    }
+                });
+            },
+
+            initVue() {
+                const { createApp, ref, computed, reactive } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app');
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        const files = ref([]);
+                        const isDragging = ref(false);
+                        const isProcessing = ref(false);
+                        const options = reactive({ maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true });
+                        const processedFiles = computed(() => files.value.filter(f => f.status === 'done'));
+
+                        const totalSaved = computed(() => {
+                            let orig = 0, comp = 0;
+                            files.value.forEach(f => { if(f.status === 'done' && f.compressed) { orig += f.original.size; comp += f.compressed.size; } });
+                            const saved = orig - comp;
+                            return formatSize(saved > 0 ? saved : 0);
+                        });
+
+                        const formatSize = (bytes) => {
+                            if (bytes === 0) return '0 B';
+                            const k = 1024;
+                            const sizes = ['B', 'KB', 'MB'];
+                            const i = Math.floor(Math.log(bytes) / Math.log(k));
+                            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                        };
+
+                        const handleFiles = async (event) => {
+                            const inputFiles = event.target ? event.target.files : event;
+                            if(!inputFiles || inputFiles.length === 0) return;
+
+                            const newBatch = Array.from(inputFiles).map(f => reactive({ original: f, compressed: null, status: 'pending' }));
+                            files.value.push(...newBatch);
+                            isProcessing.value = true;
+
+                            for (let item of newBatch) {
+                                try {
+                                    item.status = 'processing';
+                                    const opts = { ...options };
+                                    const sizeInMB = item.original.size / 1024 / 1024;
+                                    if(sizeInMB < opts.maxSizeMB) opts.maxSizeMB = sizeInMB * 0.8;
+                                    item.compressed = await imageCompression(item.original, opts);
+                                    item.status = 'done';
+                                } catch (e) { item.status = 'error'; }
+                            }
+                            isProcessing.value = false;
+                        };
+
+                        const downloadAll = async () => {
+                            const zip = new JSZip();
+                            processedFiles.value.forEach(f => zip.file(`slim_${f.original.name}`, f.compressed));
+                            saveAs(await zip.generateAsync({type:"blob"}), "pixel_ops_diet_results.zip");
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return {
+                            currentTab, t, files, isDragging, isProcessing, options, processedFiles, totalSaved,
+                            handleFiles, formatSize, downloadAll
+                        };
+                    }
+                });
+
+                app.use(createVuetify({
+                    theme: { defaultTheme: document.documentElement.getAttribute('data-theme') || 'dark' }
+                })).mount('#vue-root');
+            }
+        };
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

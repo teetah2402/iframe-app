@@ -1,0 +1,20 @@
+<div class="min-h-full flex flex-col items-center bg-core p-8 text-center pb-20 justify-center">
+    <div class="relative w-40 h-40 mb-10 animate-bounce" style="animation-duration: 3s">
+        <div class="absolute inset-0 bg-brand rounded-[2.5rem] rotate-12 opacity-20 scale-110 animate-pulse"></div>
+        <div class="gummy-board absolute inset-0 flex items-center justify-center bg-panel border-4">
+            <v-icon icon="mdi-information-variant" size="80" class="text-brand"></v-icon>
+        </div>
+    </div>
+
+    <h1 class="text-5xl md:text-8xl font-display font-black text-main leading-tight tracking-tighter uppercase text-main">
+        {{ t.heroTitle.split(' ')[0] }} <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pop_blue">{{ t.heroTitle.split(' ').slice(1).join(' ') }}</span>
+    </h1>
+
+    <div class="max-w-3xl mt-12 gummy-board p-10 border-4 border-dashed bg-black/5">
+        <p class="text-lg font-bold leading-relaxed text-muted font-mono leading-relaxed">{{ t.heroDesc }}</p>
+    </div>
+
+    <button @click="currentTab = 'app'" class="btn-game mt-12 px-12 py-6 bg-brand text-white text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all ring-8 ring-brand/10">
+        {{ t.backToEdit }}
+    </button>
+</div>

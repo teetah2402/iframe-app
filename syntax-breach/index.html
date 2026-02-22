@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Syntax Breach | Data Translator Unit</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Persistence Logic: Mencegah Layar Kedip (Flicker)
+      const getSavedTheme = () => localStorage.getItem('flowork_os_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', getSavedTheme());
+
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+              pop_purple: '#BC13FE',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #BC13FE;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #EF476F;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* HIDE SCROLLBAR GLOBAL */
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+
+        html, body {
+            background-color: var(--bg-core); color: var(--text-main);
+            width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+            transition: background-color 0.4s ease; margin: 0; padding: 0;
+        }
+
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+
+        /* Input & Textarea Look "Diukir" */
+        textarea, input:not([type="range"]) {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.05) !important;
+            border: 3px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.25); border-radius: 1.8rem;
+            font-weight: 800; transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+        }
+        .btn-game:active:not(:disabled) { border-bottom-width: 0px; transform: translateY(6px); }
+        .btn-game:disabled { opacity: 0.5; cursor: not-allowed; border-bottom-width: 2px; }
+
+        .tab-fade-enter-active { transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.95) translateY(30px); }
+    </style>
+</head>
+<body>
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        const i18n = {
+            id: {
+                heroTitle: "Coding Santai,", heroSub: "Tanpa Jejak!",
+                heroDesc: "Translator data paling asyik. JSON, CSV, Base64? Sikat semua di browser lo tanpa upload ke awan. Aman pol!",
+                startBtn: "Deploy Konverter! 🚀",
+                appTitle: "Syntax Breach",
+                modeJson: "JSON FMT", modeCsv: "JSON > CSV", modeB64: "BASE64", modeUrl: "URL ENC",
+                inputHint: "Paste data mentah lo di sini...",
+                outputHint: "Hasil olahan bakal muncul di sini...",
+                copyBtn: "SALIN DATA", dlBtn: "EXPORT CSV", clearBtn: "BERSIHKAN",
+                objective: "MISI UTAMA",
+                objDesc: "Biar Developer & Data Analyst akur. Ubah data mentah jadi format yang manusiawi.",
+                back: "Kembali"
+            },
+            en: {
+                heroTitle: "Code Anywhere,", heroSub: "Leave No Trace!",
+                heroDesc: "The Swiss Army Knife of data translators. Convert it all locally. Privacy first, always!",
+                startBtn: "Deploy Converter! 🚀",
+                appTitle: "Syntax Breach",
+                modeJson: "JSON FMT", modeCsv: "JSON > CSV", modeB64: "BASE64", modeUrl: "URL ENC",
+                inputHint: "Paste raw data stream here...",
+                outputHint: "Processed data will appear here...",
+                copyBtn: "COPY DATA", dlBtn: "EXPORT CSV", clearBtn: "CLEAR ALL",
+                objective: "MISSION BRIEF",
+                objDesc: "Bridging the gap between Devs & Analysts. Make raw data human-readable.",
+                back: "Back"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+            async init() {
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([
+                    fetch('partials/lander.html?v=' + cb),
+                    fetch('partials/app.html?v=' + cb)
+                ]);
+
+                document.getElementById('vue-root').innerHTML = `
+                    <v-app style="background: transparent;">
+                        <v-main class="h-full relative overflow-hidden flex flex-col">
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">
+                                    ${await rLander.text()}
+                                </div>
+                            </transition>
+                            <transition name="tab-fade">
+                                <div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col absolute top-0 left-0">
+                                    ${await rApp.text()}
+                                </div>
+                            </transition>
+                        </v-main>
+                    </v-app>`;
+
+                this.initVue();
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        const newTheme = e.data.theme;
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('flowork_os_theme', newTheme);
+                        if (this.vueInstance) this.vueInstance.theme.global.name.value = newTheme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        const newLang = e.data.lang;
+                        localStorage.setItem('flowork_lang', newLang);
+                        this.vueInstance.currentLang.value = newLang;
+                    }
+                });
+            },
+
+            initVue() {
+                const { createApp, ref, computed } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app');
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        const mode = ref('json');
+                        const inputVal = ref('');
+
+                        const outputVal = computed(() => {
+                            if(!inputVal.value) return '';
+                            try {
+                                if(mode.value === 'json') return JSON.stringify(JSON.parse(inputVal.value), null, 2);
+                                if(mode.value === 'base64') {
+                                    try { return atob(inputVal.value); } catch { return btoa(inputVal.value); }
+                                }
+                                if(mode.value === 'url') {
+                                    try { return decodeURIComponent(inputVal.value); } catch { return encodeURIComponent(inputVal.value); }
+                                }
+                                if(mode.value === 'csv') {
+                                    const json = JSON.parse(inputVal.value);
+                                    const arr = Array.isArray(json) ? json : [json];
+                                    if(arr.length === 0) return '';
+                                    const keys = Object.keys(arr[0]);
+                                    const csv = [keys.join(',')];
+                                    arr.forEach(row => csv.push(keys.map(k => JSON.stringify(row[k] ?? '')).join(',')));
+                                    return csv.join('\n');
+                                }
+                            } catch(e) { return "⚠️ ERROR: Data kurang valid!"; }
+                        });
+
+                        const copyOut = () => {
+                            if (outputVal.value) navigator.clipboard.writeText(outputVal.value);
+                        };
+
+                        const downloadCSV = () => {
+                            const blob = new Blob([outputVal.value], { type: "text/csv;charset=utf-8" });
+                            saveAs(blob, "syntax_breach_export.csv");
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return {
+                            currentTab, t, mode, inputVal, outputVal, copyOut, downloadCSV
+                        };
+                    }
+                });
+
+                app.use(createVuetify({
+                    theme: { defaultTheme: document.documentElement.getAttribute('data-theme') || 'dark' }
+                })).mount('#vue-root');
+            }
+        };
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

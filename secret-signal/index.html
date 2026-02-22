@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SECRET SIGNAL | Gummy V5.0</title>
+
+    <script>
+      const savedTheme = localStorage.getItem('flowork_os_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #0000FF;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0d0221; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #00d4ff !important; --border-color: #334155; --brand-color: #00d4ff;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+        html, body { background-color: var(--bg-core); color: var(--text-main); width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.4s ease; margin: 0; }
+        .gummy-board { background: var(--bg-panel); border-radius: 2.5rem; border: 4px solid var(--border-color); box-shadow: var(--soft-shadow); }
+        textarea, input { color: #0080ff !important; background: rgba(0,0,0,0.03) !important; border: 3px solid var(--border-color) !important; border-radius: 1.5rem !important; outline: none !important; font-weight: 700 !important; }
+        .btn-game { border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem; font-weight: 800; transition: all 0.1s ease; }
+        .btn-game:active:not(:disabled) { border-bottom-width: 0px; transform: translateY(6px); }
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    </style>
+</head>
+<body>
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        const i18n = {
+            id: {
+                manifesto: "MANIFESTO 📜", heroTitle: "BYPASS SENSOR AI", heroDesc: "Ubah pesan rahasia lo jadi audio sintetis. 100% aman, tanpa database, tanpa jejak.", startBtn: "BUKA ENCODER 🚀",
+                encTab: "ENCODER 🔒", decTab: "DECODER 🔓", payloadLabel: "PESAN RAHASIA", payloadPlaceholder: "Ketik rahasia lo...", keyLabel: "KUNCI KEAMANAN (OPSIONAL)", genBtn: "GENERATE WAV 📡",
+                uploadHint: "KLIK ATAU DROP MEDIA DI SINI", decryptBtn: "DECODE SIGNAL 📡", resultLabel: "HASIL DECODE:", copyBtn: "SALIN PESAN", downloadReady: "SINYAL SIAP!", downloadBtn: "DOWNLOAD WAV",
+                loadingSync: "SINKRONISASI...", loadingAnalyze: "ANALISIS...", modalTitle: "SIGNAL TERKUNCI", modalDesc: "Masukkan password untuk membuka.", modalAction: "DECRYPT", modalCancel: "BATAL",
+                waitingTitle: "SPECTRUM READY", waitingDesc: "Menunggu Input Sinyal...", resetBtn: "SCAN LAGI"
+            },
+            en: {
+                manifesto: "MANIFESTO 📜", heroTitle: "BYPASS AI SENSORS", heroDesc: "Transform your secret messages into synthetic audio. 100% safe, no database, no traces.", startBtn: "OPEN ENCODER 🚀",
+                encTab: "ENCODER 🔒", decTab: "DECODER 🔓", payloadLabel: "SECRET PAYLOAD", payloadPlaceholder: "Type your secrets...", keyLabel: "SECURITY KEY (OPTIONAL)", genBtn: "GENERATE WAV 📡",
+                uploadHint: "CLICK OR DROP MEDIA HERE", decryptBtn: "DECODE SIGNAL 📡", resultLabel: "DECODED RESULT:", copyBtn: "COPY MESSAGE", downloadReady: "SIGNAL READY!", downloadBtn: "DOWNLOAD WAV",
+                loadingSync: "SYNCING...", loadingAnalyze: "ANALYZING...", modalTitle: "SIGNAL LOCKED", modalDesc: "Enter password to unlock.", modalAction: "DECRYPT", modalCancel: "CANCEL",
+                waitingTitle: "SPECTRUM READY", waitingDesc: "Awaiting Signal Input...", resetBtn: "SCAN AGAIN"
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+            async init() {
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([fetch('partials/lander.html?v='+cb), fetch('partials/app.html?v='+cb)]);
+                document.getElementById('vue-root').innerHTML = `
+                    <v-app style="background: transparent;">
+                        <v-main class="h-full relative overflow-hidden flex flex-col">
+                            <transition name="tab-fade"><div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">${await rLander.text()}</div></transition>
+                            <transition name="tab-fade"><div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col absolute top-0 left-0">${await rApp.text()}</div></transition>
+
+                            <v-overlay v-model="isProcessing" class="align-center justify-center" persistent>
+                                <div class="gummy-board p-10 bg-panel text-center border-brand shadow-2xl">
+                                    <v-progress-circular indeterminate color="brand" size="64" width="8" class="mb-6"></v-progress-circular>
+                                    <h3 class="font-display font-black text-main text-2xl uppercase">{{ loadingText }}</h3>
+                                </div>
+                            </v-overlay>
+
+                            <v-dialog v-model="showUnlockModal" max-width="400" persistent>
+                                <div class="gummy-board p-10 bg-panel text-center border-pop_pink shadow-2xl">
+                                    <v-icon icon="mdi-lock" color="pop_pink" size="64" class="mb-4"></v-icon>
+                                    <h3 class="font-display font-black text-main text-2xl uppercase">{{ t.modalTitle }}</h3>
+                                    <p class="text-xs font-bold text-muted mb-8">{{ t.modalDesc }}</p>
+                                    <input v-model="modalPassword" type="password" class="w-full p-4 mb-6 text-center text-lg" placeholder="PASSWORD">
+                                    <div class="flex flex-col gap-3">
+                                        <button @click="handleUnlock" class="btn-game w-full py-4 bg-pop_pink text-white font-black">{{ t.modalAction }}</button>
+                                        <button @click="showUnlockModal = false" class="text-[10px] font-black text-muted uppercase">{{ t.modalCancel }}</button>
+                                    </div>
+                                </div>
+                            </v-dialog>
+                        </v-main>
+                    </v-app>`;
+                this.initVue();
+            },
+
+            initVue() {
+                const { createApp, ref, reactive, computed, onMounted } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app'); const subTab = ref('encode');
+                        const isProcessing = ref(false); const loadingText = ref('');
+                        const showUnlockModal = ref(false); const modalPassword = ref('');
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'id');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        const encodeData = reactive({ text: '', pass: '', lastBlob: null });
+                        const decodeState = reactive({ file: null, fileName: '', result: '', extractedRaw: '' });
+
+                        const handleEncode = async () => {
+                            if(!encodeData.text) return;
+                            loadingText.value = t.value.loadingSync; isProcessing.value = true;
+                            await new Promise(r => setTimeout(r, 1500));
+
+                            const sampleRate = 44100; const duration = 3; const dataSize = sampleRate * duration * 2;
+                            const buffer = new ArrayBuffer(44 + dataSize); const view = new DataView(buffer);
+                            const writeStr = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+                            writeStr(0, 'RIFF'); view.setUint32(4, 36 + dataSize, true); writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+                            view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+                            view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+                            view.setUint16(32, 2, true); view.setUint16(34, 16, true); writeStr(36, 'data'); view.setUint32(40, dataSize, true);
+                            for (let i = 0; i < sampleRate * duration; i++) {
+                                const t_val = i / sampleRate; const freq = 600 + (Math.sin(t_val * 30) * 150);
+                                view.setInt16(44 + i * 2, (Math.sin(2 * Math.PI * freq * t_val) * 0.5 + (Math.random() - 0.5) * 0.05) * 0x7FFF, true);
+                            }
+                            let finalPayload = encodeData.text;
+                            if(encodeData.pass) finalPayload = "ENC:" + CryptoJS.AES.encrypt(encodeData.text, encodeData.pass).toString();
+                            encodeData.lastBlob = new Blob([view, "###FLOWORK_SECURE_DATA###" + btoa(finalPayload)], { type: 'audio/wav' });
+                            isProcessing.value = false;
+                        };
+
+                        const downloadEncoded = () => {
+                            if (!encodeData.lastBlob) return;
+                            const url = window.URL.createObjectURL(encodeData.lastBlob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.setAttribute('download', `SIGNAL_${Date.now()}.wav`);
+                            document.body.appendChild(link); // Fix: Wajib masuk DOM biar bisa di klik di iframe
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                        };
+
+                        const handleFileSelect = (e) => {
+                            const file = e.target.files[0];
+                            if(file) { decodeState.file = file; decodeState.fileName = file.name; decodeState.result = ''; }
+                        };
+
+                        const executeDecode = async () => {
+                            if(!decodeState.file) return;
+                            loadingText.value = t.value.loadingAnalyze; isProcessing.value = true;
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const parts = e.target.result.split("###FLOWORK_SECURE_DATA###");
+                                if (parts.length > 1) {
+                                    const decodedRaw = atob(parts[parts.length - 1]);
+                                    if(decodedRaw.startsWith("ENC:")) {
+                                        decodeState.extractedRaw = decodedRaw.replace("ENC:", "");
+                                        showUnlockModal.value = true;
+                                    } else {
+                                        decodeState.result = decodedRaw;
+                                    }
+                                }
+                                isProcessing.value = false;
+                            };
+                            reader.readAsBinaryString(decodeState.file);
+                        };
+
+                        const handleUnlock = () => {
+                            try {
+                                const bytes = CryptoJS.AES.decrypt(decodeState.extractedRaw, modalPassword.value);
+                                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                                if(!decrypted) throw new Error();
+                                decodeState.result = decrypted; showUnlockModal.value = false;
+                            } catch(e) { alert("PASSWORD SALAH!"); }
+                        };
+
+                        onMounted(() => {
+                            window.addEventListener('message', (e) => {
+                                if (e.data?.type === 'THEME_CHANGE') { theme.global.name.value = e.data.theme; document.documentElement.setAttribute('data-theme', e.data.theme); }
+                                if (e.data?.type === 'LANG_CHANGE') { currentLang.value = e.data.lang; }
+                            });
+                        });
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return { currentTab, subTab, t, isProcessing, loadingText, showUnlockModal, modalPassword, encodeData, decodeState, handleEncode, downloadEncoded, handleFileSelect, executeDecode, handleUnlock };
+                    }
+                });
+                app.use(createVuetify()).mount('#vue-root');
+            }
+        };
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

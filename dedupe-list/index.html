@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dedupe List | Data Cleaner</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+              pop_amber: '#F59E0B'
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        /* GUMMY BOARD THEME ENGINE */
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F59E0B; /* Amber Brand */
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #F59E0B;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        html, body {
+           background-color: var(--bg-core); color: var(--text-main);
+           width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+           transition: background-color 0.4s ease;
+        }
+
+        /* GUMMY RUMUS VISUAL */
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+        textarea, input {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.03) !important;
+            border: 2px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+        }
+        .btn-game:active:not(:disabled) {
+            border-bottom-width: 0px; transform: translateY(6px);
+        }
+
+        /* ANIMATIONS */
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        // KAMUS I18N
+        const i18n = {
+            id: {
+                app_title: "DEDUPE LIST",
+                app_subtitle: "LIST CLEANER V2.0",
+                btn_info: "INFO",
+                btn_app: "ALAT",
+
+                // App UI
+                label_input: "INPUT (DATA KOTOR)",
+                label_output: "OUTPUT (BERSIH)",
+                ph_input: "Paste data kamu di sini...\nContoh:\nApel\nJeruk\nApel (Ini duplikat)",
+                ph_output: "Hasil bersih akan muncul di sini...",
+
+                // Stats
+                stat_input: "INPUT",
+                stat_output: "HASIL",
+                stat_removed: "DIHAPUS",
+
+                // Options
+                opt_title: "OPSI FILTER",
+                opt_lowercase: "Abaikan Huruf Besar/Kecil",
+                opt_lowercase_desc: "Semua jadi huruf kecil (lower)",
+                opt_trim: "Hapus Spasi Berlebih",
+                opt_trim_desc: "Rapikan spasi kiri/kanan",
+                opt_sort: "Urutkan A-Z",
+                opt_sort_desc: "Rapikan urutan abjad",
+
+                // Actions
+                btn_process: "BERSIHKAN LIST",
+                btn_clear: "RESET",
+                btn_copy: "SALIN HASIL",
+
+                // Lander
+                lander_badge: "DATA CLEANER",
+                lander_title: "DATA KEMBAR?",
+                lander_title_hl: "BERSIHKAN INSTAN.",
+                lander_desc: "Menghapus data ganda satu per satu itu cara lama. Bersihkan, urutkan, dan rapikan ribuan baris database dalam milidetik.",
+                lander_btn_start: "MULAI BERSIH-BERSIH",
+                lander_flow_1: "Paste Data",
+                lander_flow_1_d: "Tempel list kotor dari Excel/Notepad.",
+                lander_flow_2: "Otomatisasi",
+                lander_flow_2_d: "Sistem mendeteksi & menghapus duplikat.",
+                lander_flow_3: "Copy Bersih",
+                lander_flow_3_d: "Ambil data yang sudah rapi.",
+                lander_feat_1: "Super Cepat",
+                lander_feat_1_d: "Proses 10.000+ baris < 0.5 detik.",
+                lander_feat_2: "Privasi Aman",
+                lander_feat_2_d: "Data diproses lokal di browser.",
+                lander_msg: "Clean data, clear mind."
+            },
+            en: {
+                app_title: "DEDUPE LIST",
+                app_subtitle: "LIST CLEANER V2.0",
+                btn_info: "INFO",
+                btn_app: "TOOL",
+
+                label_input: "INPUT (RAW DATA)",
+                label_output: "OUTPUT (CLEAN)",
+                ph_input: "Paste your list here...\nExample:\nApple\nOrange\nApple (Duplicate)",
+                ph_output: "Clean results will appear here...",
+
+                stat_input: "INPUT",
+                stat_output: "RESULT",
+                stat_removed: "REMOVED",
+
+                opt_title: "FILTER OPTIONS",
+                opt_lowercase: "Ignore Case",
+                opt_lowercase_desc: "Convert all to lowercase",
+                opt_trim: "Trim Whitespace",
+                opt_trim_desc: "Remove extra spaces",
+                opt_sort: "Sort A-Z",
+                opt_sort_desc: "Alphabetical order",
+
+                btn_process: "CLEAN LIST",
+                btn_clear: "RESET",
+                btn_copy: "COPY RESULT",
+
+                lander_badge: "DATA CLEANER",
+                lander_title: "DUPLICATE DATA?",
+                lander_title_hl: "CLEAN INSTANTLY.",
+                lander_desc: "Removing duplicates manually is outdated. Clean, sort, and organize thousands of rows in milliseconds.",
+                lander_btn_start: "START CLEANING",
+                lander_flow_1: "Paste Data",
+                lander_flow_1_d: "Paste raw list from Excel/Notepad.",
+                lander_flow_2: "Automate",
+                lander_flow_2_d: "System detects & removes duplicates.",
+                lander_flow_3: "Copy Clean",
+                lander_flow_3_d: "Get your organized data instantly.",
+                lander_feat_1: "Super Fast",
+                lander_feat_1_d: "Process 10,000+ rows < 0.5s.",
+                lander_feat_2: "Privacy First",
+                lander_feat_2_d: "Data processed locally in browser.",
+                lander_msg: "Clean data, clear mind."
+            }
+        };
+
+        const AppCore = {
+            vueInstance: null,
+
+            async init() {
+                // Load saved theme
+                const savedTheme = localStorage.getItem('flowork_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([fetch('partials/lander.html?v='+cb), fetch('partials/app.html?v='+cb)]);
+
+                document.getElementById('vue-root').innerHTML = `
+                   <v-app style="background: transparent;">
+                       <v-main class="h-full flex flex-col relative overflow-hidden">
+                           <transition name="tab-fade"><div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">${await rLander.text()}</div></transition>
+                           <transition name="tab-fade"><div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden pb-40 md:pb-0 flex flex-col absolute top-0 left-0">${await rApp.text()}</div></transition>
+                       </v-main>
+                   </v-app>`;
+
+                this.initVue(savedTheme);
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        document.documentElement.setAttribute('data-theme', e.data.theme);
+                        localStorage.setItem('flowork_theme', e.data.theme);
+                        if(this.vueInstance) this.vueInstance.theme.global.name.value = e.data.theme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        localStorage.setItem('flowork_lang', e.data.lang);
+                        this.vueInstance.currentLang.value = e.data.lang;
+                    }
+                });
+
+                console.log("SYSTEM: DEDUPE LIST READY (GUMMY V5.0)");
+            },
+
+            initVue(savedTheme) {
+                const { createApp, ref, computed, watch } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+                        const currentTab = ref('app'); // Default tab App
+
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        // STATE
+                        const inputText = ref("");
+                        const outputText = ref("");
+                        const optLowercase = ref(false);
+                        const optTrim = ref(true);
+                        const optSort = ref(true);
+
+                        // STATS
+                        const statInput = computed(() => inputText.value ? inputText.value.trim().split('\n').length : 0);
+                        const statOutput = computed(() => outputText.value ? outputText.value.trim().split('\n').length : 0);
+                        const statRemoved = computed(() => statInput.value - statOutput.value);
+
+                        // LOGIC DEDUPE (Internal Implementation)
+                        const processDedupe = () => {
+                            if (!inputText.value) {
+                                outputText.value = "";
+                                return;
+                            }
+
+                            // 1. Split lines
+                            let lines = inputText.value.split('\n');
+
+                            // 2. Normalize (Trim & Lowercase temporary for comparison)
+                            let uniqueSet = new Set();
+                            let cleanLines = [];
+
+                            lines.forEach(line => {
+                                let originalLine = line;
+
+                                if (optTrim.value) originalLine = originalLine.trim();
+                                if (!originalLine && optTrim.value) return; // Skip empty if trimming
+
+                                let compareKey = originalLine;
+                                if (optLowercase.value) {
+                                    compareKey = compareKey.toLowerCase();
+                                    originalLine = originalLine.toLowerCase(); // Output also lowercase
+                                }
+
+                                if (!uniqueSet.has(compareKey)) {
+                                    uniqueSet.add(compareKey);
+                                    cleanLines.push(originalLine);
+                                }
+                            });
+
+                            // 3. Sort
+                            if (optSort.value) {
+                                cleanLines.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+                            }
+
+                            outputText.value = cleanLines.join('\n');
+                        };
+
+                        const clearAll = () => {
+                            inputText.value = "";
+                            outputText.value = "";
+                        };
+
+                        const copyResult = () => {
+                            navigator.clipboard.writeText(outputText.value);
+                        };
+
+                        return {
+                            currentTab, t,
+                            inputText, outputText,
+                            optLowercase, optTrim, optSort,
+                            statInput, statOutput, statRemoved,
+                            processDedupe, clearAll, copyResult
+                        };
+                    }
+                });
+
+                app.use(createVuetify({ theme: { defaultTheme: savedTheme } })).mount('#vue-root');
+            }
+        };
+
+        // Bridge function
+        window.switchAppTab = (tabName) => {
+            if(AppCore.vueInstance && AppCore.vueInstance._instance) {
+                 AppCore.vueInstance._instance.setupState.currentTab = tabName;
+            } else {
+                 document.getElementById('vue-root').__vue_app__._instance.setupState.currentTab = tabName;
+            }
+        };
+
+        window.appCore = AppCore;
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

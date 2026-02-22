@@ -1,0 +1,39 @@
+<div class="min-h-full flex flex-col items-center justify-center p-8 text-center bg-transparent animate-pop-in">
+
+    <div class="relative w-44 h-44 mb-10 animate-bounce cursor-pointer group">
+        <div class="absolute inset-0 bg-brand rounded-[3rem] rotate-12 opacity-20 scale-110 group-hover:rotate-45 transition-transform duration-500"></div>
+        <div class="absolute inset-0 border-8 border-brand rounded-[2.5rem] bg-panel shadow-[0_15px_0_rgba(0,0,0,0.1)] flex items-center justify-center overflow-hidden">
+            <div class="w-full h-4 bg-pop_pink absolute top-8 -rotate-12 blur-[1px] opacity-40"></div>
+            <div class="w-full h-4 bg-pop_blue absolute bottom-12 rotate-45 blur-[1px] opacity-40"></div>
+            <v-icon icon="mdi-shield- account-outline" size="80" class="text-brand drop-shadow-lg z-10"></v-icon>
+        </div>
+    </div>
+
+    <h1 class="text-6xl md:text-8xl font-display font-black mb-6 leading-[0.9] text-main tracking-tighter">
+        {{ t.heroTitle }} <br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pop_pink drop-shadow-sm">{{ t.heroSub }}</span>
+    </h1>
+
+    <p class="text-muted text-xl md:text-2xl max-w-xl mx-auto mb-14 font-bold leading-snug">
+        {{ t.heroDesc }}
+    </p>
+
+    <div class="flex flex-wrap justify-center gap-4 mb-16 max-w-2xl">
+        <div class="gummy-board px-8 py-3 border-2 flex items-center gap-2 transform -rotate-2">
+            <v-icon icon="mdi-ghost" color="brand"></v-icon>
+            <span class="text-xs font-black uppercase">Invisible Armor</span>
+        </div>
+        <div class="gummy-board px-8 py-3 border-2 flex items-center gap-2 transform rotate-3">
+            <v-icon icon="mdi-test-tube" color="pop_pink"></v-icon>
+            <span class="text-xs font-black uppercase">Pixel Poison</span>
+        </div>
+        <div class="gummy-board px-8 py-3 border-2 flex items-center gap-2 transform -rotate-1">
+            <v-icon icon="mdi-incognito" color="pop_green"></v-icon>
+            <span class="text-xs font-black uppercase">Local Defense</span>
+        </div>
+    </div>
+
+    <button @click="currentTab = 'app'" class="btn-game px-16 py-6 bg-brand text-white text-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all ring-8 ring-brand/20">
+        {{ t.startBtn }}
+    </button>
+</div>

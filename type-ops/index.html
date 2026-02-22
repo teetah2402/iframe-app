@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Type Ops | Tactical Text Encoder</title>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.0/dist/vuetify.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: 'var(--brand-color)', core: 'var(--bg-core)', panel: 'var(--bg-panel)',
+              main: 'var(--text-main)', muted: 'var(--text-muted)', border: 'var(--border-color)',
+              pop_pink: '#FF4D6D', pop_blue: '#00B4D8', pop_green: '#06D6A0', pop_yellow: '#FFD166',
+            },
+            fontFamily: { sans: ['"Quicksand"', 'sans-serif'], display: ['"Fredoka"', 'sans-serif'] },
+          }
+        }
+      }
+    </script>
+
+    <style>
+        /* GUMMY BOARD THEME ENGINE */
+        :root {
+            --bg-core: #F0F4FF; --bg-panel: #FFFFFF; --text-main: #1E1B4B;
+            --text-muted: #4338CA; --border-color: #CBD5E1; --brand-color: #F72585;
+            --soft-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.1);
+        }
+        [data-theme='dark'] {
+            --bg-core: #0F172A; --bg-panel: #1E293B; --text-main: #FFFFFF !important;
+            --text-muted: #94A3B8 !important; --border-color: #334155; --brand-color: #FF006E;
+            --soft-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        html, body {
+           background-color: var(--bg-core); color: var(--text-main);
+           width: 100%; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+           transition: background-color 0.4s ease;
+        }
+
+        /* GUMMY RUMUS VISUAL */
+        .gummy-board {
+            background: var(--bg-panel); border-radius: 2.5rem;
+            border: 4px solid var(--border-color); box-shadow: var(--soft-shadow);
+        }
+        textarea, input {
+            color: var(--text-main) !important; background: rgba(0,0,0,0.03) !important;
+            border: 2px solid var(--border-color) !important; border-radius: 1.5rem !important;
+            outline: none !important; font-weight: 700 !important;
+        }
+        .btn-game {
+            border-bottom: 6px solid rgba(0,0,0,0.2); border-radius: 1.5rem;
+            font-weight: 800; transition: all 0.1s ease;
+        }
+        .btn-game:active {
+            border-bottom-width: 0px; transform: translateY(6px);
+        }
+
+        /* ANIMATIONS */
+        .tab-fade-enter-active { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tab-fade-enter-from { opacity: 0; transform: scale(0.9) translateY(20px); }
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* UNUSED CYBERPUNK STYLE (TIDAK DIHAPUS, HANYA DIKOMENTAR)
+        :root {
+            --neon-cyan: #54d7f6; --neon-purple: #706bf3;
+            --input-bg: #3a3962; --type-purple: #bc13fe;
+        }
+        .cyber-grid { ... }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 3px; }
+        */
+    </style>
+</head>
+<body>
+
+    <main class="flex-1 relative w-full h-full" id="vue-root"></main>
+
+    <script>
+        // KAMUS I18N
+        const i18n = {
+            id: {
+                lander_title: "BIKIN TULISAN BOLD/ITALIC DI WA & IG BIO",
+                lander_subtitle: "GENERATOR FONT GAUL",
+                lander_version: "TACTICAL TEXT ENCODER V3.4",
+                lander_unicode: "● UNICODE READY",
+                lander_btn_deploy: "MULAI ENCODER SEKARANG",
+                lander_secure: "100% CLIENT-SIDE • NO LOGS • AMAN",
+                lander_privacy_title: "🛡️ PRIVACY PROTOCOL: AKTIF",
+                lander_privacy_badge: "AMAN",
+                lander_privacy_desc1: "Sistem Terisolasi. Type Ops ngelakuin manipulasi teks langsung di browser lo pake JavaScript. Gak ada satu huruf pun yang dikirim ke server. Super aman buat data rahasia.",
+                lander_privacy_desc2: ">> GAK BUTUH API KEY <<",
+                lander_art_title: "Seni Typo Warfare",
+                lander_art_desc: "Teks biasa tuh lemah, Bro. Mata audiens udah kebal. Lo butuh visual yang eye-catching. Type Ops ini senjata lo buat stand out!",
+                lander_unicode_title: "Unicode: Bahasa Rahasia",
+                lander_unicode_desc: "Banyak yang ngira ini 'font baru'. Salah! Kita manfaatin simbol matematika & abjad kuno buat gantiin huruf A-Z lo.",
+                lander_repeater_title: "Engagement Hack: The Repeater",
+                lander_repeater_desc: "Fitur Repeater bisa ngelipatgandain satu kata jadi ratusan baris. Cocok buat prank temen atau bikin pola visual.",
+                app_title: "TYPE OPS",
+                app_btn_back: "INFO & PRIVASI", /* Disesuaikan biar lebih jelas kalau ini tombol ke info */
+                app_tab_styles: "GAYA HURUF",
+                app_tab_repeater: "REPEATER",
+                app_source_input: "INPUT TEKS LO",
+                app_btn_clear: "HAPUS",
+                app_input_placeholder: "Ketik pesan rahasia lo di sini...",
+                app_btn_spacer: "SPASI KOSONG",
+                app_btn_copy_raw: "COPY ASLI",
+                app_awaiting_input: "NUNGGU INPUT DARI LO...",
+                app_btn_copy: "SALIN",
+                app_repeat_count: "JUMLAH PENGULANGAN",
+                app_new_line: "Baris Baru",
+                app_btn_copy_result: "SALIN HASIL",
+                app_preview_output: "PREVIEW HASIL"
+            },
+            en: {
+                lander_title: "CREATE BOLD/ITALIC TEXT FOR WA & IG BIO",
+                lander_subtitle: "COOL FONT GENERATOR",
+                lander_version: "TACTICAL TEXT ENCODER V3.4",
+                lander_unicode: "● UNICODE READY",
+                lander_btn_deploy: "DEPLOY ENCODER NOW",
+                lander_secure: "100% CLIENT-SIDE • NO LOGS • SECURE",
+                lander_privacy_title: "🛡️ PRIVACY PROTOCOL: ACTIVE",
+                lander_privacy_badge: "SECURE",
+                lander_privacy_desc1: "Isolated System. Type Ops performs text manipulation directly in your browser. Not a single letter is sent to any server. Highly secure.",
+                lander_privacy_desc2: ">> NO API KEY REQUIRED <<",
+                lander_art_title: "The Art of Typo Warfare",
+                lander_art_desc: "Plain text is weak, Bro. Audiences are immune. You need an eye-catching visual. Type Ops is your weapon to stand out!",
+                lander_unicode_title: "Unicode: The Secret Language",
+                lander_unicode_desc: "Many think this is a 'new font'. Wrong! We utilize math symbols & ancient alphabets to replace your A-Z.",
+                lander_repeater_title: "Engagement Hack: The Repeater",
+                lander_repeater_desc: "The Repeater feature multiplies one word into hundreds of lines. Perfect for pranks or visual patterns.",
+                app_title: "TYPE OPS",
+                app_btn_back: "INFO & PRIVACY", /* Disesuaikan */
+                app_tab_styles: "STYLES",
+                app_tab_repeater: "REPEATER",
+                app_source_input: "SOURCE INPUT",
+                app_btn_clear: "CLEAR",
+                app_input_placeholder: "Type tactical message here...",
+                app_btn_spacer: "BLANK SPACER",
+                app_btn_copy_raw: "COPY RAW",
+                app_awaiting_input: "AWAITING INPUT SIGNAL...",
+                app_btn_copy: "COPY",
+                app_repeat_count: "REPETITION COUNT",
+                app_new_line: "New Line",
+                app_btn_copy_result: "COPY RESULT",
+                app_preview_output: "PREVIEW OUTPUT"
+            }
+        };
+
+        const AppCore = {
+            userIdentity: null,
+            vueInstance: null,
+
+            async init() {
+                // Theme & Lang Persistence dari LocalStorage
+                const savedTheme = localStorage.getItem('flowork_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+
+                const cb = Date.now();
+                const [rLander, rApp] = await Promise.all([fetch('partials/lander.html?v='+cb), fetch('partials/app.html?v='+cb)]);
+
+                document.getElementById('vue-root').innerHTML = `
+                   <v-app style="background: transparent;">
+                       <v-main class="h-full flex flex-col relative overflow-hidden">
+                           <transition name="tab-fade"><div v-show="currentTab === 'lander'" class="w-full h-full overflow-y-auto absolute top-0 left-0">${await rLander.text()}</div></transition>
+                           <transition name="tab-fade"><div v-show="currentTab === 'app'" class="w-full h-full overflow-y-auto md:overflow-hidden pb-40 md:pb-0 flex flex-col absolute top-0 left-0">${await rApp.text()}</div></transition>
+                       </v-main>
+                   </v-app>`;
+
+                this.initVue(savedTheme);
+
+                window.addEventListener('message', (e) => {
+                    if (e.data?.type === 'FLOWORK_IDENTITY_SYNC') {
+                        this.setIdentity(e.data.userAddress);
+                    }
+                    if (e.data?.type === 'THEME_CHANGE') {
+                        document.documentElement.setAttribute('data-theme', e.data.theme);
+                        localStorage.setItem('flowork_theme', e.data.theme);
+                        if(this.vueInstance) this.vueInstance.theme.global.name.value = e.data.theme;
+                    }
+                    if (e.data?.type === 'LANG_CHANGE' && this.vueInstance) {
+                        localStorage.setItem('flowork_lang', e.data.lang);
+                        this.vueInstance.currentLang.value = e.data.lang;
+                    }
+                });
+
+                console.log("SYSTEM: TYPE OPS READY (GUMMY V5.0)");
+            },
+
+            setIdentity(address) {
+                this.userIdentity = address;
+            },
+
+            openSettings() {
+                window.parent.postMessage({ type: 'OPEN_SETTINGS', tab: 'variables' }, '*');
+            },
+
+            initVue(savedTheme) {
+                const { createApp, ref, computed } = Vue;
+                const { createVuetify, useTheme } = Vuetify;
+
+                const app = createApp({
+                    setup() {
+                        const theme = useTheme();
+
+                        // FIX: DEFAULT TAB WAJIB APP SAAT PERTAMA BUKA!
+                        const currentTab = ref('app');
+
+                        // Default ambil dari LocalStorage
+                        const currentLang = ref(localStorage.getItem('flowork_lang') || 'en');
+                        const t = computed(() => i18n[currentLang.value] || i18n['en']);
+
+                        // STATE LAMA TYPE OPS
+                        const mode = ref('styles');
+                        const inputText = ref('');
+                        const repeatCount = ref(10);
+                        const repeatNewLine = ref(true);
+
+                        // DICTIONARY MAPS
+                        const maps = {
+                            bold: "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗",
+                            italic: "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧0123456789",
+                            boldItalic: "𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛0123456789",
+                            script: "𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏0123456789",
+                            boldScript: "𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃0123456789",
+                            fraktur: "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷0123456789",
+                            boldFraktur: "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖛𝖜𝖝𝖞𝖟0123456789",
+                            double: "𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡",
+                            sans: "𝖠𝖡𝖢𝖣𝖤𝖥𝖦𝖧𝖨𝖩𝖪𝖫𝖬𝖭𝖮𝖯𝖰𝖱𝖲𝖳𝖴𝖵𝖶𝖷𝖸𝖹𝖺𝖻𝖼𝖽𝖾𝖿𝗀𝗁𝗂𝗃𝗄𝗅𝗆𝗇𝗈𝗉𝗊𝗋𝗌𝗍𝗎𝗏𝗐𝗑𝗒𝗓𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫",
+                            boldSans: "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵",
+                            mono: "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿",
+                            bubble: "ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ0①②③④⑤⑥⑦⑧⑨"
+                        };
+
+                        const normal = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+                        const styles = {
+                            bold: { name: "Bold (Serif)" },
+                            boldSans: { name: "Bold (Sans)" },
+                            italic: { name: "Italic" },
+                            boldItalic: { name: "Bold Italic" },
+                            script: { name: "Script" },
+                            boldScript: { name: "Bold Script" },
+                            fraktur: { name: "Gothic" },
+                            boldFraktur: { name: "Bold Gothic" },
+                            double: { name: "Double Struck" },
+                            mono: { name: "Monospace" },
+                            bubble: { name: "Bubble" },
+                            flip: { name: "Upside Down" }
+                        };
+
+                        const transform = (text, type) => {
+                            if (!text) return "";
+                            if (type === 'flip') {
+                                const map = {'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'l','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z','A':'∀','B':'q','C':'Ɔ','D':'p','E':'Ǝ','F':'Ⅎ','G':'פ','H':'H','I':'I','J':'ſ','K':'ʞ','L':'˥','M':'W','N':'N','O':'O','P':'Ԁ','Q':'Ò','R':'ᴚ','S':'S','T':'⊥','U':'∩','V':'Λ','W':'M','X':'X','Y':'⅄','Z':'Z','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6','0':'0','.':'˙',',':'\'','?':'¿','!':'¡','"':',,'};
+                                return text.split('').reverse().map(c => map[c] || c).join('');
+                            }
+                            const targetMap = maps[type];
+                            if (!targetMap) return text;
+                            return text.split('').map(char => {
+                                const index = normal.indexOf(char);
+                                if (index === -1) return char;
+                                const mapArray = Array.from(targetMap);
+                                return mapArray[index] || char;
+                            }).join('');
+                        };
+
+                        const repeatedText = computed(() => {
+                            if (!inputText.value) return t.value.app_awaiting_input;
+                            const sep = repeatNewLine.value ? '\n' : ' ';
+                            return Array(parseInt(repeatCount.value)).fill(inputText.value).join(sep);
+                        });
+
+                        const copyText = (txt) => {
+                            navigator.clipboard.writeText(txt);
+                        };
+
+                        const copyInput = () => copyText(inputText.value);
+                        const copyRepeated = () => copyText(repeatedText.value);
+
+                        const addSpacer = () => {
+                            inputText.value += "\n⠀\n";
+                        };
+
+                        AppCore.vueInstance = { theme, currentLang };
+                        return { currentTab, t, mode, inputText, styles, transform, copyText, repeatCount, repeatNewLine, repeatedText, copyRepeated, copyInput, addSpacer };
+                    }
+                });
+
+                app.use(createVuetify({ theme: { defaultTheme: savedTheme } })).mount('#vue-root');
+            }
+        };
+
+        // Bridge function untuk menggantikan logic lama HTML
+        window.switchAppTab = (tabName) => {
+            if(AppCore.vueInstance && AppCore.vueInstance._instance) {
+                 // Update reactively
+                 AppCore.vueInstance._instance.setupState.currentTab = tabName;
+            } else {
+                 // Fallback
+                 document.getElementById('vue-root').__vue_app__._instance.setupState.currentTab = tabName;
+            }
+        };
+
+        window.appCore = AppCore;
+        window.onload = () => AppCore.init();
+    </script>
+</body>
+</html>

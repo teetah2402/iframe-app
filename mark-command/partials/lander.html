@@ -1,0 +1,94 @@
+<div class="max-w-5xl mx-auto px-6 md:px-10 pt-16 font-sans pb-32">
+
+    <div class="text-center mb-16 md:mb-20">
+        <div class="opacity-0 animate-pop-in inline-block bg-brand text-white px-6 py-2 rounded-full text-sm font-bold tracking-widest mb-8 shadow-lg transform rotate-[-2deg] hover:rotate-2 transition-transform cursor-pointer">
+            {{ t.badge }}
+        </div>
+
+        <h1 class="opacity-0 animate-pop-in text-5xl md:text-8xl font-black mb-6 font-display text-main tracking-tight leading-tight drop-shadow-md" style="animation-delay: 0.1s;">
+            {{ t.title1 }} <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-pop_yellow animate-pulse">{{ t.title2 }}</span>
+        </h1>
+
+        <p class="opacity-0 animate-pop-in text-muted text-lg md:text-2xl max-w-2xl mx-auto font-bold" style="animation-delay: 0.2s;">{{ t.desc }}</p>
+    </div>
+
+    <div class="opacity-0 animate-pop-in text-center mb-24 px-2" style="animation-delay: 0.3s;">
+        <button @click="switchTab('app')" class="btn-game inline-flex w-full md:w-auto bg-pop_pink text-white font-bold font-display py-4 px-12 rounded-full text-2xl shadow-xl hover:bg-opacity-90 active:scale-95 group flex items-center justify-center gap-3 mx-auto">
+            {{ t.btnLaunch }}
+        </button>
+    </div>
+
+    <div class="gummy-board opacity-0 animate-pop-in w-full max-w-5xl mx-auto overflow-hidden relative aspect-video group mb-24 transform hover:scale-[1.02] transition-all duration-300" style="animation-delay: 0.4s;">
+
+        <div class="absolute inset-0 bg-gradient-to-br from-pop_blue via-brand to-pop_pink flex items-center justify-center overflow-hidden rounded-[2rem]">
+            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(white 3px, transparent 3px); background-size: 40px 40px;"></div>
+
+            <div class="relative z-10 w-[85%] md:w-[70%] h-[75%] bg-panel border-4 border-border rounded-[2rem] flex flex-col shadow-2xl transform rotate-3 group-hover:rotate-0 transition-transform duration-500 overflow-hidden">
+                <div class="bg-core px-6 py-4 flex gap-3 items-center border-b-4 border-border">
+                    <div class="w-5 h-5 rounded-full bg-pop_pink shadow-sm"></div>
+                    <div class="w-5 h-5 rounded-full bg-pop_yellow shadow-sm"></div>
+                    <div class="w-5 h-5 rounded-full bg-pop_green shadow-sm"></div>
+                </div>
+                <div class="flex-1 p-8 flex flex-col gap-5 bg-panel">
+                    <div class="w-1/3 h-8 bg-border rounded-full animate-pulse"></div>
+                    <div class="w-full h-5 bg-core rounded-full"></div>
+                    <div class="w-4/5 h-5 bg-core rounded-full"></div>
+
+                    <div class="mt-auto w-full h-24 bg-core rounded-2xl border-4 border-dashed border-border flex items-center justify-center text-main text-2xl md:text-5xl font-black font-display tracking-widest shadow-inner group-hover:scale-105 transition-transform">
+                        <span class="mr-3">🪄</span> CSS MAGIC!
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute top-10 right-16 text-6xl md:text-8xl animate-bounce-slow drop-shadow-xl z-0">✨</div>
+            <div class="absolute bottom-10 left-16 text-6xl md:text-8xl animate-wiggle drop-shadow-xl z-20">🚀</div>
+            <div class="absolute top-1/2 right-10 text-4xl md:text-6xl animate-pulse drop-shadow-xl z-20">🎮</div>
+        </div>
+
+        <div class="absolute top-4 right-4 bg-pop_yellow text-black font-black font-display px-5 py-2 rounded-full transform rotate-12 shadow-lg animate-wiggle z-30">
+            NO IMAGE! 💥
+        </div>
+    </div>
+
+    <div v-show="userIdentity" class="gummy-board opacity-0 animate-pop-in mb-24 p-8 md:p-12 relative mx-2 md:mx-0 transition-all transform hover:-translate-y-2" style="animation-delay: 0.5s;">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b-4 border-brand/30 pb-6 gap-4 border-dashed">
+            <h3 class="font-display font-black text-main text-2xl md:text-4xl drop-shadow-sm">{{ t.proTitle }}</h3>
+            <span class="text-sm bg-pop_green text-white px-5 py-2 rounded-full font-black uppercase tracking-widest shadow-md transform -rotate-2">{{ t.proBadge }}</span>
+        </div>
+        <div class="flex gap-6 items-center">
+            <div class="text-6xl animate-bounce">🎁</div>
+            <div>
+                <p class="text-lg md:text-2xl text-main mb-4 leading-relaxed font-bold" v-html="t.proGreeting"></p>
+                <button @click="openSettings()" class="btn-game bg-pop_blue text-white font-bold text-sm flex items-center gap-2 px-6 py-3 rounded-full">
+                    {{ t.btnConfig }} <v-icon size="small">mdi-tune</v-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto text-main text-base md:text-lg leading-8 px-2 md:px-0 opacity-0 animate-pop-in" style="animation-delay: 0.6s;">
+        <h2 class="text-brand font-display text-4xl md:text-5xl mb-6 font-black text-center">{{ t.docTitle }}</h2>
+        <p class="mb-12 text-muted text-center max-w-2xl mx-auto font-bold text-xl" v-html="t.docP1"></p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="gummy-board p-8 hover:-translate-y-3 transition-transform duration-300 group">
+                <div class="bg-pop_yellow w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-6 shadow-md group-hover:animate-spin-slow">📱</div>
+                <p v-html="t.docF1" class="text-main font-bold leading-relaxed"></p>
+            </div>
+            <div class="gummy-board p-8 hover:-translate-y-3 transition-transform duration-300 group" style="transition-delay: 100ms;">
+                <div class="bg-pop_pink w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-6 shadow-md group-hover:animate-bounce">🎨</div>
+                <p v-html="t.docF2" class="text-main font-bold leading-relaxed"></p>
+            </div>
+            <div class="gummy-board p-8 hover:-translate-y-3 transition-transform duration-300 group" style="transition-delay: 200ms;">
+                <div class="bg-pop_blue w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-6 shadow-md group-hover:animate-pulse">⚡</div>
+                <p v-html="t.docF3" class="text-main font-bold leading-relaxed"></p>
+            </div>
+        </div>
+
+        <div class="mt-32 mb-10 text-center">
+            <span class="bg-border text-muted px-6 py-3 rounded-full font-black tracking-widest uppercase text-sm border-2 border-dashed border-muted/50">{{ t.eof }}</span>
+        </div>
+    </div>
+
+</div>

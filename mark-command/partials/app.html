@@ -1,0 +1,74 @@
+<div class="opacity-0 animate-pop-in flex flex-col md:flex-row justify-between items-center px-4 py-3 md:px-6 md:py-4 bg-panel z-20 shrink-0 gap-4 md:gap-0 border-b-4 border-border shadow-sm sticky top-0">
+    <div class="flex items-center justify-between w-full md:w-auto">
+        <div class="flex items-center gap-4 cursor-pointer hover:scale-105 transition-transform" @click="switchTab('lander')">
+            <div class="bg-brand text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-3 hover:rotate-3 transition-transform">
+                <v-icon icon="mdi-gamepad-variant" size="28"></v-icon>
+            </div>
+            <div>
+                <h1 class="font-display text-2xl font-black text-main tracking-tight leading-none">
+                    Mark<span class="text-pop_pink">Command</span>
+                </h1>
+            </div>
+        </div>
+
+        <button @click="switchTab('lander')" class="btn-game md:hidden text-xs font-bold bg-core text-main px-4 py-2 flex items-center gap-1.5">
+            <v-icon size="small">mdi-map</v-icon> {{ t.appBack }}
+        </button>
+    </div>
+
+    <div class="w-full md:w-auto overflow-hidden">
+        <div class="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+
+            <div class="flex gap-2 shrink-0">
+                <button @click="insertTemplate('basic')" class="btn-game bg-pop_yellow text-black px-5 py-2 text-sm font-bold flex items-center gap-2 whitespace-nowrap">
+                    <v-icon size="small">mdi-star-four-points</v-icon> {{ t.appBasic }}
+                </button>
+                <button @click="insertTemplate('api')" class="btn-game bg-pop_blue text-white px-5 py-2 text-sm font-bold flex items-center gap-2 whitespace-nowrap">
+                    <v-icon size="small">mdi-flash</v-icon> {{ t.appApi }}
+                </button>
+            </div>
+
+            <button @click="downloadMD" class="btn-game bg-pop_green text-white px-6 py-2.5 text-sm font-bold flex items-center gap-2 whitespace-nowrap shrink-0 ml-2">
+                <v-icon size="small">mdi-content-save-outline</v-icon> {{ t.appSave }}
+            </button>
+
+            <button @click="switchTab('lander')" class="btn-game hidden md:flex text-sm font-bold bg-core text-main px-5 py-2.5 hover:bg-border items-center gap-2 whitespace-nowrap shrink-0 ml-2">
+                <v-icon size="small">mdi-map-marker-path</v-icon> {{ t.appBack }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="opacity-0 animate-pop-in flex-1 flex flex-col md:flex-row w-full h-auto md:h-full min-h-0 no-scrollbar p-4 md:p-6 gap-6 bg-transparent" style="animation-delay: 0.1s;">
+
+    <div class="gummy-board w-full md:w-1/2 flex flex-col min-h-[60vh] md:h-auto md:flex-1 relative group">
+        <div class="absolute -top-4 left-6 bg-pop_pink text-white px-5 py-1.5 rounded-full font-display font-black tracking-wider text-sm shadow-md transform -rotate-2 z-10 group-focus-within:animate-wiggle">
+            {{ t.appInput }}
+        </div>
+
+        <div class="flex-1 relative mt-6 h-full">
+            <textarea v-model="input" :placeholder="t.placeholder" class="textarea-fun w-full h-full p-6 md:p-8 text-main font-sans text-base md:text-lg leading-relaxed resize-none transition-all selection:bg-pop_pink/30 no-scrollbar" style="background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important;"></textarea>
+        </div>
+    </div>
+
+    <div class="gummy-board w-full md:w-1/2 flex flex-col min-h-[60vh] md:h-auto md:flex-1 relative">
+        <div class="absolute -top-4 right-6 bg-brand text-white px-5 py-1.5 rounded-full font-display font-black tracking-wider text-sm shadow-md transform rotate-2 z-10">
+            {{ t.appPreview }}
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar p-6 md:p-10 mt-6 h-full">
+            <div class="prose prose-sm md:prose-base max-w-none text-main
+                prose-headings:font-display prose-headings:font-black prose-headings:text-main
+                prose-h1:text-4xl md:prose-h1:text-5xl prose-h1:mb-6 prose-h1:text-brand
+                prose-h2:text-2xl md:prose-h2:text-3xl prose-h2:border-b-4 prose-h2:border-pop_yellow prose-h2:pb-2 prose-h2:mt-8 prose-h2:inline-block
+                prose-a:text-pop_blue hover:prose-a:text-pop_pink prose-a:font-bold prose-a:underline prose-a:decoration-4 prose-a:underline-offset-2
+                prose-strong:text-pop_pink prose-strong:font-black
+                prose-code:text-pop_green prose-code:bg-green-50/10 prose-code:px-2 prose-code:py-1 prose-code:rounded-xl prose-code:font-bold prose-code:border-2 prose-code:border-green-200/20
+                prose-pre:bg-gray-900 prose-pre:text-white prose-pre:border-4 prose-pre:border-gray-800 prose-pre:shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] prose-pre:rounded-[1.5rem]
+                prose-blockquote:border-l-8 prose-blockquote:border-pop_pink prose-blockquote:bg-pop_pink/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-3xl prose-blockquote:font-bold prose-blockquote:text-main prose-blockquote:italic"
+                v-html="compiledMarkdown">
+            </div>
+        </div>
+    </div>
+
+</div>

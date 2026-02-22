@@ -1,0 +1,103 @@
+<div class="flex flex-col h-full w-full bg-core overflow-y-auto md:overflow-hidden pb-40 md:pb-0">
+
+    <div class="flex h-20 bg-panel border-b-4 border-border shrink-0 items-center justify-between px-6 sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-brand p-1.5 rounded-xl rotate-3 shadow-lg"><v-icon icon="mdi-layout-outline" color="white" size="20"></v-icon></div>
+            <span class="font-display font-black text-main text-lg uppercase tracking-tight text-main">NEXUS<span class="text-brand">EDIT</span></span>
+        </div>
+        <button @click="currentTab = 'lander'" class="btn-game bg-panel border-4 border-border px-6 py-2 text-[10px] flex items-center gap-2 hover:text-brand transition-all">
+            <v-icon size="14">mdi-information-outline</v-icon> <span class="hidden md:inline">{{ t.manifesto }}</span>
+        </button>
+    </div>
+
+    <div class="flex-1 flex flex-col md:flex-row p-4 md:p-8 gap-8 h-full overflow-hidden">
+
+        <div class="w-full md:w-[450px] flex flex-col gap-6 shrink-0 min-h-[60vh]">
+            <div class="gummy-board flex-1 p-8 space-y-10 overflow-y-auto no-scrollbar border-4 bg-panel">
+
+                <section class="space-y-6">
+                    <h3 class="font-display font-black text-main opacity-40 uppercase text-[11px] tracking-widest ml-2">{{ t.step1 }}</h3>
+                    <div class="gummy-board p-6 bg-black/5 border-dashed flex items-center gap-6">
+                        <div class="relative group cursor-pointer shrink-0" @click="$refs.avatarInput.click()">
+                            <div v-if="!bioData.avatar" class="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-panel border-4 border-border shadow-lg flex items-center justify-center">
+                                <v-icon icon="mdi-account-plus" size="48" class="text-muted opacity-30"></v-icon>
+                            </div>
+                            <img v-else :src="bioData.avatar" class="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] object-cover border-4 border-border shadow-lg">
+                            <input type="file" ref="avatarInput" class="hidden" @change="handleImageUpload">
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <label class="text-[10px] font-black text-muted uppercase">{{ t.handle }}</label>
+                            <div class="flex items-center">
+                                <span class="bg-border/30 px-3 py-3 rounded-l-2xl border-y-2 border-l-2 border-border text-xs font-black">/bio/</span>
+                                <input v-model="bioData.handle" type="text" class="w-full !rounded-l-none !border-l-0 !py-3" placeholder="username">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[10px] font-black text-muted uppercase ml-4">{{ t.dname }}</label>
+                            <input v-model="bioData.name" type="text" class="p-4" :placeholder="t.dname">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[10px] font-black text-muted uppercase ml-4">{{ t.bio }}</label>
+                            <textarea v-model="bioData.bio" rows="2" class="p-4 resize-none" :placeholder="t.bio"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="space-y-4">
+                    <h3 class="font-display font-black text-main opacity-40 uppercase text-[11px] tracking-widest ml-2">{{ t.step2 }}</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button v-for="thm in themes" :key="thm" @click="bioData.theme = thm" :class="bioData.theme === thm ? 'border-brand bg-brand/10 text-brand' : 'border-border bg-panel text-muted opacity-60'" class="gummy-board p-3 text-[10px] font-black uppercase tracking-tighter border-2 transition-all hover:scale-105 active:scale-95">{{ thm }}</button>
+                    </div>
+                </section>
+
+                <section class="space-y-6 pb-10">
+                    <div class="flex justify-between items-center px-2">
+                        <h3 class="font-display font-black text-main opacity-40 uppercase text-[11px] tracking-widest">{{ t.step3 }}</h3>
+                        <button @click="addLink" class="text-[10px] font-black text-brand bg-brand/10 px-4 py-2 rounded-xl hover:bg-brand hover:text-white transition-all uppercase">{{ t.addLink }}</button>
+                    </div>
+                    <div class="space-y-4">
+                        <div v-for="(link, i) in bioData.links" :key="i" class="gummy-board p-4 space-y-3 relative animate-pop-in">
+                            <div class="flex gap-2">
+                                <input v-model="link.title" class="flex-1 !py-2 !text-xs" placeholder="TITLE">
+                                <button @click="removeLink(i)" class="p-2 text-pop_pink hover:bg-pop_pink/10 rounded-xl transition"><v-icon icon="mdi-delete-outline" size="20"></v-icon></button>
+                            </div>
+                            <input v-model="link.url" class="w-full !py-2 !text-[10px] font-mono" placeholder="https://">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <button @click="deploy" :disabled="isDeploying" class="btn-game w-full py-6 bg-pop_green text-black text-xl shadow-[0_12px_0_#04A077] hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all uppercase font-black">
+                <v-icon v-if="isDeploying" class="animate-spin mr-2">mdi-loading</v-icon>
+                {{ t.publishBtn }}
+            </button>
+        </div>
+
+        <div class="flex-1 flex items-center justify-center bg-black/5 relative min-h-[60vh] md:min-h-0">
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(var(--text-muted) 1.5px, transparent 1.5px); background-size: 30px 30px;"></div>
+            <div class="relative w-full h-full md:w-[360px] md:h-[720px] md:border-[12px] md:border-black md:rounded-[3.5rem] bg-white shadow-2xl overflow-hidden transform md:scale-90 lg:scale-100 transition-all">
+                <div class="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-3xl z-50"></div>
+
+                <div class="h-full w-full overflow-y-auto no-scrollbar flex flex-col p-6 items-center text-center transition-all duration-500" :data-preview-theme="bioData.theme">
+                    <div class="preview-card w-full min-h-full flex flex-col items-center p-8 rounded-[2.5rem] transition-all duration-500 shadow-xl">
+                        <div class="w-24 h-24 rounded-full border-4 border-brand shadow-xl mt-12 overflow-hidden flex items-center justify-center bg-white/10">
+                             <v-icon v-if="!bioData.avatar" icon="mdi-account-circle" size="64" style="color: inherit;"></v-icon>
+                             <img v-else :src="bioData.avatar" class="w-full h-full object-cover">
+                        </div>
+                        <h2 class="font-display font-black text-2xl tracking-tight mt-6" style="color: inherit;">{{ bioData.name }}</h2>
+                        <p class="text-xs font-bold opacity-60 mt-1" style="color: inherit;">@{{ bioData.handle || 'username' }}</p>
+                        <p class="text-sm font-medium leading-relaxed px-4 mt-6" style="color: inherit;">{{ bioData.bio }}</p>
+                        <div class="w-full space-y-4 mt-10">
+                            <div v-for="link in bioData.links" :key="link.title" class="gummy-board p-4 text-sm font-black border-2 transition-all" style="background: rgba(0,0,0,0.05); border-color: currentColor; color: inherit;">
+                                {{ link.title }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
